@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import axios from "axios";
+import { Toast } from "primereact/toast";
 
 const API_URL = "https://gkeepbackend.campingx.net/postNote/";
 const API_TOKEN = "As#Jjjjj4qjo4r90m*NG&h8ha_839";
@@ -8,6 +9,7 @@ const CreateNote = ({ onAddNote, fetchNotes }) => {
   const [title, setTitle] = useState("");
   const [textContent, setTextContent] = useState("");
   const [isBodyVisible, setIsBodyVisible] = useState(false); // Controls visibility
+  const toast = useRef(null);
 
   const handleAddNote = async () => {
     if (!title.trim() && !textContent.trim()) return;
@@ -34,6 +36,7 @@ const CreateNote = ({ onAddNote, fetchNotes }) => {
         setTitle("");
         setTextContent("");
         setIsBodyVisible(false); // Hide after adding note
+        toast.current.show({ severity: 'success', summary: 'Success', detail: 'Note successfully created.' });
       }
     } catch (error) {
       console.error("Error adding note:", error);
@@ -73,6 +76,7 @@ const CreateNote = ({ onAddNote, fetchNotes }) => {
           </div>
         </div>
       )}
+       <Toast ref={toast} />
     </div>
   );
 };

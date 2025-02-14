@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Dialog } from "primereact/dialog";
 import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";
@@ -7,7 +7,7 @@ import axios from "axios";
 const NoteDialog = ({ visible, onHide, selectedNote, onUpdate, onDelete }) => {
   const [title, setTitle] = useState("");
   const [textContent, setTextContent] = useState("");
-  const toast = React.useRef(null);
+  const toast = useRef(null);
 
   useEffect(() => {
     if (selectedNote) {
