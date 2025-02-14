@@ -110,7 +110,7 @@ span.search-icon span{
   display: flex;
   justify-content: flex-start;
   gap: 15px;
-  padding-top: 20px;
+  padding-top: 5px;
 }
 
 .create-note .cn-header.ui,
@@ -204,5 +204,9 @@ button.add-Btn {
   justify-content: flex-end;
 }
   
+.note-dialog-cstm {
+  width: 95% !important;
+}
+
 }
 

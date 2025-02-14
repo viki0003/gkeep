@@ -16,6 +16,7 @@ const NoteDialog = ({ visible, onHide, selectedNote, onUpdate, onDelete }) => {
     }
   }, [selectedNote]);
 
+
   const handleSave = async () => {
     try {
       const response = await axios.put(
@@ -79,6 +80,18 @@ const NoteDialog = ({ visible, onHide, selectedNote, onUpdate, onDelete }) => {
     }
   };
 
+  const footerContent = (
+    <div className="footer-btn">
+        <Button
+          label="Delete"
+          icon="pi pi-trash"
+          className="p-button-danger"
+          onClick={handleDelete}
+        />
+        <Button label="Save" icon="pi pi-check" onClick={handleSave} />
+    </div>
+);
+
   return (
     <Dialog
       header={
@@ -89,6 +102,7 @@ const NoteDialog = ({ visible, onHide, selectedNote, onUpdate, onDelete }) => {
       onHide={onHide}
       draggable={false}
       className="note-dialog-cstm"
+      footer={footerContent}
     >
       <Toast ref={toast} />
       <textarea
@@ -96,7 +110,7 @@ const NoteDialog = ({ visible, onHide, selectedNote, onUpdate, onDelete }) => {
         onChange={(e) => setTextContent(e.target.value)}
         rows={12}
       />
-      <div className="footer-btn">
+      {/* <div className="footer-btn">
         <Button
           label="Delete"
           icon="pi pi-trash"
@@ -104,7 +118,7 @@ const NoteDialog = ({ visible, onHide, selectedNote, onUpdate, onDelete }) => {
           onClick={handleDelete}
         />
         <Button label="Save" icon="pi pi-check" onClick={handleSave} />
-      </div>
+      </div> */}
     </Dialog>
   );
 };
