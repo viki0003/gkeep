@@ -106,7 +106,7 @@ const NotesList = () => {
 
   return (
     <>
-      <Header onSearch={setSearchTerm} />
+      <Header onSearch={setSearchTerm} onRefresh={fetchNotes} loading={loading} />
       <div className="container">
         {loading ? (
           <Loader />

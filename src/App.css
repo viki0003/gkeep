@@ -163,6 +163,9 @@ button.add-Btn {
   color: black;
 }
 
+.refresh{
+  cursor: pointer;
+}
 @media (max-width: 991px) {
   .note-list .item {
     width: calc(50% - 25px);
