@@ -13,14 +13,29 @@ const CreateNote = ({ onAddNote, fetchNotes }) => {
   const [loading, setLoading] = useState(false);
   const toast = useRef(null);
 
+  const getColorBasedOnTitleLength = (title) => {
+    const wordCount = title.trim().split(/\s+/).length;
+    if (wordCount >= 1 && wordCount <= 5) return "#faafa8";
+    if (wordCount >= 6 && wordCount <= 8) return "#f39f76";
+    if (wordCount >= 9 && wordCount <= 12) return "#fff8b8";
+    if (wordCount >= 12 && wordCount <= 18) return "#e2f6d3";
+    if (wordCount >= 19 && wordCount <= 25) return "#b4ddd3";
+    if (wordCount >= 26 && wordCount <= 30) return "#d4e4ed";
+    if (wordCount >= 31 && wordCount <= 40) return "#aeccdc";
+    if (wordCount >= 41 && wordCount <= 60) return "#d3bfdb";
+    if (wordCount >= 60 && wordCount <= 80) return "#e9e3d4";
+    return "#ffffff"; // Default color
+  };
+
   const handleAddNote = async () => {
     if (!title.trim() && !textContent.trim()) return;
     setLoading(true);
     try {
+      const color = getColorBasedOnTitleLength(title);
       let request = {
         title,
         textContent,
-        color: "#ffffff",
+        color,
         textContentHtml: "test",
         userEditedTimestampUsec: "Test1",
         createdTimestampUsec: "Test2",
