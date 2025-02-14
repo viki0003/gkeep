@@ -134,7 +134,8 @@ span.search-icon span{
 }
 
 .create-note .cn-body textarea,
-.cn-header input{
+.cn-header input,
+.p-dialog-content textarea{
     width: 100%;
     resize: none;
 }
