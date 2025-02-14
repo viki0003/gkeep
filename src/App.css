@@ -49,7 +49,7 @@ span.search-icon span {
 .header .logo {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: start;
 }
 
 .container {
@@ -212,4 +212,8 @@ button.add-Btn {
   .container {
     padding: 25px 15px;
   }
+
+  .header .logo img {
+    width: 55px;
+}
 }
