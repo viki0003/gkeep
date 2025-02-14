@@ -62,6 +62,7 @@ span.search-icon span{
   display: flex;
   flex-wrap: wrap;
   gap: 25px;
+  justify-content: center;
 }
 
 .note-list .item {
@@ -175,6 +176,14 @@ button.add-Btn {
 
   .header .search-bar .search-bar-item {
     width: 300px;
+}
+  
+}
+
+
+@media (max-width:500px) {
+  .header .search-bar .search-bar-item {
+    width: 200px;
 }
   
 }
