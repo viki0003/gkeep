@@ -174,16 +174,35 @@ button.add-Btn {
     width: 100%;
   }
 
-  .header .search-bar .search-bar-item {
-    width: 300px;
+  .header .search-bar,
+  .header .search-bar .search-bar-item{
+      width: 100%;
+  }
+
+  .header{
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+
+
+.header .search-bar {
+  order: 3;
+  flex: 0 0 100%;
+  max-width: 100%;
+}
+
+.header .logo {
+  flex: 0 0 49%;
+  max-width: 49%;
+}
+
+.header .refresh {
+  flex: 0 0 47%;
+  max-width: 47%;
+  display: flex;
+  justify-content: flex-end;
 }
   
 }
 
-
-@media (max-width:500px) {
-  .header .search-bar .search-bar-item {
-    width: 200px;
-}
-  
-}
