@@ -110,9 +110,9 @@ const CreateNote = ({ onAddNote, fetchNotes }) => {
         <Toast ref={toast} />
       </div>
       {loading && (
-        <div className="loader-container">
+        
           <Loader />
-        </div>
+        
       )}
     </>
   );

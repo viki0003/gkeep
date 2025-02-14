@@ -1,6 +1,6 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
 
-*{
+* {
   box-sizing: border-box;
   font-family: "Poppins", serif;
   margin: 0px;
@@ -13,10 +13,10 @@ textarea {
 }
 
 span.search-icon,
-span.search-icon span{
-    display: flex;
-    align-items: center;
-    justify-content: center;
+span.search-icon span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .header {
@@ -25,10 +25,10 @@ span.search-icon span{
   justify-content: space-between;
   gap: 25px;
   padding: 10px 15px;
-    border-bottom: 1px solid #DADCE0;
+  border-bottom: 1px solid #dadce0;
 }
 
-.header .search-bar  .search-bar-item {
+.header .search-bar .search-bar-item {
   display: flex;
   align-items: center;
   width: 500px;
@@ -47,9 +47,9 @@ span.search-icon span{
 }
 
 .header .logo {
-  font-size: 22px;
-  line-height: 22px;
-  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .container {
@@ -72,8 +72,9 @@ span.search-icon span{
   border-radius: 6px;
 }
 
-.note-list .item p {word-break: break-all;}
-
+.note-list .item p {
+  word-break: break-all;
+}
 
 .note-list .item h4 {
   font-size: 16px;
@@ -100,13 +101,13 @@ span.search-icon span{
   padding: 0px !important;
   border: 0px !important;
   font-size: 1rem;
-    font-weight: 400;
-    line-height: 1.5rem;
-    letter-spacing: .00625em;
-    max-height: 500px;
+  font-weight: 400;
+  line-height: 1.5rem;
+  letter-spacing: 0.00625em;
+  max-height: 500px;
 }
 
-.note-dialog-cstm .footer-btn{
+.note-dialog-cstm .footer-btn {
   display: flex;
   justify-content: flex-start;
   gap: 15px;
@@ -135,13 +136,13 @@ span.search-icon span{
 
 .create-note .cn-body textarea,
 .cn-header input,
-.p-dialog-content textarea{
-    width: 100%;
-    resize: none;
+.p-dialog-content textarea {
+  width: 100%;
+  resize: none;
 }
 
-.cn-header input{
- font-size: 18px;
+.cn-header input {
+  font-size: 18px;
 }
 
 .cn-ftr-btn {
@@ -157,61 +158,55 @@ span.search-icon span{
   cursor: pointer;
 }
 
-
 button.add-Btn {
   background: burlywood;
   color: black;
 }
 
-@media (max-width:991px) {
+@media (max-width: 991px) {
   .note-list .item {
     width: calc(50% - 25px);
   }
-  
 }
 
-@media (max-width:600px) {
+@media (max-width: 600px) {
   .note-list .item {
     width: 100%;
   }
 
   .header .search-bar,
-  .header .search-bar .search-bar-item{
-      width: 100%;
+  .header .search-bar .search-bar-item {
+    width: 100%;
   }
 
-  .header{
+  .header {
     gap: 10px;
     flex-wrap: wrap;
   }
 
+  .header .search-bar {
+    order: 3;
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
 
+  .header .logo {
+    flex: 0 0 49%;
+    max-width: 49%;
+  }
 
-.header .search-bar {
-  order: 3;
-  flex: 0 0 100%;
-  max-width: 100%;
+  .header .refresh {
+    flex: 0 0 47%;
+    max-width: 47%;
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .note-dialog-cstm {
+    width: 95% !important;
+  }
+
+  .container {
+    padding: 25px 15px;
+  }
 }
-
-.header .logo {
-  flex: 0 0 49%;
-  max-width: 49%;
-}
-
-.header .refresh {
-  flex: 0 0 47%;
-  max-width: 47%;
-  display: flex;
-  justify-content: flex-end;
-}
-  
-.note-dialog-cstm {
-  width: 95% !important;
-}
-
-.container {
-  padding: 25px 15px;
-}
-
-}
-
