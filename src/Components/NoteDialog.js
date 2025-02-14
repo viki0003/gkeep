@@ -3,10 +3,12 @@ import { Dialog } from "primereact/dialog";
 import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";
 import axios from "axios";
+import Loader from "./Loader/Loader";
 
 const NoteDialog = ({ visible, onHide, selectedNote, onUpdate, onDelete }) => {
   const [title, setTitle] = useState("");
   const [textContent, setTextContent] = useState("");
+  const [loading, setLoading] = useState(false);
   const toast = useRef(null);
 
   useEffect(() => {
@@ -16,8 +18,8 @@ const NoteDialog = ({ visible, onHide, selectedNote, onUpdate, onDelete }) => {
     }
   }, [selectedNote]);
 
-
   const handleSave = async () => {
+    setLoading(true);
     try {
       const response = await axios.put(
         `https://gkeepbackend.campingx.net/updateNote/?id=${selectedNote.id}`,
@@ -46,12 +48,14 @@ const NoteDialog = ({ visible, onHide, selectedNote, onUpdate, onDelete }) => {
         summary: "Error",
         detail: "Failed to update note",
       });
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleDelete = async () => {
     if (!selectedNote) return;
-
+    setLoading(true);
     try {
       const response = await axios.delete(
         `https://gkeepbackend.campingx.net/deleteNote/?id=${selectedNote.id}`,
@@ -77,20 +81,22 @@ const NoteDialog = ({ visible, onHide, selectedNote, onUpdate, onDelete }) => {
         summary: "Error",
         detail: "Failed to delete note",
       });
+    } finally {
+      setLoading(false);
     }
   };
 
   const footerContent = (
     <div className="footer-btn">
-        <Button
-          label="Delete"
-          icon="pi pi-trash"
-          className="p-button-danger"
-          onClick={handleDelete}
-        />
-        <Button label="Save" icon="pi pi-check" onClick={handleSave} />
+      <Button
+        label="Delete"
+        icon="pi pi-trash"
+        className="p-button-danger"
+        onClick={handleDelete}
+      />
+      <Button label="Save" icon="pi pi-check" onClick={handleSave} />
     </div>
-);
+  );
 
   return (
     <Dialog
@@ -105,11 +111,22 @@ const NoteDialog = ({ visible, onHide, selectedNote, onUpdate, onDelete }) => {
       footer={footerContent}
     >
       <Toast ref={toast} />
-      <textarea
-        value={textContent}
-        onChange={(e) => setTextContent(e.target.value)}
-        rows={12}
-      />
+      {loading ? (
+        <Loader />
+      ) : (
+        <>
+          <textarea
+            value={textContent}
+            onChange={(e) => setTextContent(e.target.value)}
+            style={{
+              width: "100%",
+              height: "200px",
+              border: "1px solid #ccc",
+              padding: "10px",
+            }}
+          />
+        </>
+      )}
       {/* <div className="footer-btn">
         <Button
           label="Delete"

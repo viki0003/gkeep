@@ -3,6 +3,7 @@ import axios from "axios";
 import NoteDialog from "./NoteDialog";
 import Header from "./Header";
 import CreateNote from "./CreateNote";
+import Loader from "./Loader/Loader";
 
 const API_URL = "https://gkeepbackend.campingx.net/getNotes/";
 const API_TOKEN = "As#Jjjjj4qjo4r90m*NG&h8ha_839";
@@ -37,8 +38,6 @@ const NotesList = () => {
   };
 
   useEffect(() => {
-   
-
     fetchNotes();
   }, []);
 
@@ -49,13 +48,15 @@ const NotesList = () => {
   };
 
   const handleUpdate = (updatedNote) => {
-    const updatedNotes = notes.map(note => note.id === updatedNote.id ? updatedNote : note);
+    const updatedNotes = notes.map((note) =>
+      note.id === updatedNote.id ? updatedNote : note
+    );
     setNotes(updatedNotes);
     setFilteredNotes(updatedNotes);
   };
 
   const handleDelete = (noteId) => {
-    const updatedNotes = notes.filter(note => note.id !== noteId);
+    const updatedNotes = notes.filter((note) => note.id !== noteId);
     setNotes(updatedNotes);
     setFilteredNotes(updatedNotes);
   };
@@ -107,35 +108,37 @@ const NotesList = () => {
     <>
       <Header onSearch={setSearchTerm} />
       <div className="container">
-        <CreateNote onAddNote={handleAddNote} fetchNotes={fetchNotes} />
         {loading ? (
-          <p>Loading notes...</p>
+          <Loader />
         ) : filteredNotes.length === 0 ? (
           <p>No notes found.</p>
         ) : (
-          <div className="note-list">
-            {filteredNotes.map((note) => (
-              <div
-                key={note.id}
-                style={{
-                  background: note.color?.toLowerCase(),
-                  cursor: "pointer",
-                }}
-                className="item"
-                onClick={() => {
-                  setSelectedNote(note);
-                  setVisible(true);
-                }}
-              >
-                {note.title?.trim() && (
-                  <h4>{highlightText(note.title, searchTerm)}</h4>
-                )}
-                {note.text_content?.trim() && (
-                  <p>{trimText(note.text_content, searchTerm)}</p>
-                )}
-              </div>
-            ))}
-          </div>
+          <>
+            <CreateNote onAddNote={handleAddNote} fetchNotes={fetchNotes} />
+            <div className="note-list">
+              {filteredNotes.map((note) => (
+                <div
+                  key={note.id}
+                  style={{
+                    background: note.color?.toLowerCase(),
+                    cursor: "pointer",
+                  }}
+                  className="item"
+                  onClick={() => {
+                    setSelectedNote(note);
+                    setVisible(true);
+                  }}
+                >
+                  {note.title?.trim() && (
+                    <h4>{highlightText(note.title, searchTerm)}</h4>
+                  )}
+                  {note.text_content?.trim() && (
+                    <p>{trimText(note.text_content, searchTerm)}</p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </>
         )}
 
         <NoteDialog
