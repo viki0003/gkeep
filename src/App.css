@@ -208,5 +208,9 @@ button.add-Btn {
   width: 95% !important;
 }
 
+.container {
+  padding: 25px 15px;
+}
+
 }
 
