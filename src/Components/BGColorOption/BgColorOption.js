@@ -16,16 +16,16 @@ const colors = [
 ];
 
 const textColors = [
-  "#000000", // Default
-  "#faafa8",
-  "#f39f76",
-  "#fff8b8",
-  "#e2f6d3",
-  "#b4ddd3",
-  "#d4e4ed",
-  "#aeccdc",
-  "#d3bfdb",
-  "#e9e3d4",
+ "#000000", // Default (for white background)
+  "#a83232", // Darker red for #faafa8
+  "#994d22", // Darker orange for #f39f76
+  "#7a6a00", // Dark mustard for #fff8b8
+  "#4a7730", // Dark green for #e2f6d3
+  "#2b6460", // Dark teal for #b4ddd3
+  "#3a5a6e", // Dark blue-gray for #d4e4ed
+  "#2d4960", // Dark blue for #aeccdc
+  "#5a3e66", // Dark purple for #d3bfdb
+  "#6d6250", // Dark brown for #e9e3d4
 ];
 
 const NoteBgColor = () => {
