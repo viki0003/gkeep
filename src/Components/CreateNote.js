@@ -3,7 +3,7 @@ import axios from "axios";
 import { Toast } from "primereact/toast";
 import Loader from "./Loader/Loader";
 import BgColorOption from "./BGColorOption/BgColorOption";
-import { IoAttach } from "react-icons/io5";
+import FileUpload from "./FileUpload";
 
 const API_URL = "https://gkeepbackend.campingx.net/postNote/";
 const API_TOKEN = "As#Jjjjj4qjo4r90m*NG&h8ha_839";
@@ -121,7 +121,8 @@ const CreateNote = ({ onAddNote, fetchNotes }) => {
                   {isVisible && <BgColorOption />}
                 </div>
                 <div className="attach-file">
-                  <IoAttach />
+                  {/* <IoAttach /> */}
+                  <FileUpload/>
                 </div>
               </div>
               <div className="cn-ftr-btn">

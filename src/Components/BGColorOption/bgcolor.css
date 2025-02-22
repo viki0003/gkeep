@@ -87,10 +87,14 @@ button.color-circle.selected.first-color svg{
 }
 
 
-.cn-ftr-icons-left .attach-file {
+.cn-ftr-icons-left .attach-file button {
     font-size: 27px;
     display: flex;
     align-items: center;
     justify-content: center;
+    padding: 0px;
+    background-color: transparent;
+    border: 0px;
     padding-bottom: 2px;
+    cursor: pointer;
 }
