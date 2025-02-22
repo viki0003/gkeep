@@ -12,7 +12,7 @@ const icons = {
   ),
   search: (
     <svg
-     width="24px"
+      width="24px"
       height="24px"
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 24 24"
@@ -36,6 +36,28 @@ const icons = {
         strokeLinecap="round"
         strokeLinejoin="round"
       />
+    </svg>
+  ),
+  CheckIcon: (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <g stroke-width="0" id="SVGRepo_bgCarrier"></g>
+      <g
+        stroke-linejoin="round"
+        stroke-linecap="round"
+        id="SVGRepo_tracerCarrier"
+      ></g>
+      <g id="SVGRepo_iconCarrier">
+        <g id="Interface / Check">
+          <path
+            stroke-linejoin="round"
+            stroke-linecap="round"
+            stroke-width="2"
+            stroke="#ffffff"
+            d="M6 12L10.2426 16.2426L18.727 7.75732"
+            id="Vector"
+          ></path>
+        </g>
+      </g>
     </svg>
   ),
 };

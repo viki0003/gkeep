@@ -3,7 +3,7 @@ import axios from "axios";
 import NoteDialog from "./NoteDialog";
 import Header from "./Header";
 import CreateNote from "./CreateNote";
-import Loader from "./Loader/Loader";
+import { FaThumbtack } from "react-icons/fa";
 
 const API_URL = "https://gkeepbackend.campingx.net/getNotes/";
 const API_TOKEN = "As#Jjjjj4qjo4r90m*NG&h8ha_839";
@@ -12,11 +12,13 @@ const NotesList = () => {
   const [visible, setVisible] = useState(false);
   const [notes, setNotes] = useState([]);
   const [filteredNotes, setFilteredNotes] = useState([]);
+  const [pinnedNotes, setPinnedNotes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedNote, setSelectedNote] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
 
   const fetchNotes = async () => {
+    setLoading(true);
     try {
       const response = await axios.get(API_URL, {
         headers: {
@@ -28,8 +30,12 @@ const NotesList = () => {
         (note) => note.title?.trim() || note.text_content?.trim()
       );
 
-      setNotes(validNotes);
-      setFilteredNotes(validNotes);
+      const pinned = validNotes.filter((note) => note.isPinned);
+      const unpinned = validNotes.filter((note) => !note.isPinned);
+
+      setNotes(unpinned);
+      setPinnedNotes(pinned);
+      setFilteredNotes(unpinned);
     } catch (error) {
       console.error("Error fetching notes:", error);
     } finally {
@@ -51,14 +57,40 @@ const NotesList = () => {
     const updatedNotes = notes.map((note) =>
       note.id === updatedNote.id ? updatedNote : note
     );
+    const updatedPinnedNotes = pinnedNotes.map((note) =>
+      note.id === updatedNote.id ? updatedNote : note
+    );
     setNotes(updatedNotes);
+    setPinnedNotes(updatedPinnedNotes);
     setFilteredNotes(updatedNotes);
   };
 
   const handleDelete = (noteId) => {
     const updatedNotes = notes.filter((note) => note.id !== noteId);
+    const updatedPinnedNotes = pinnedNotes.filter((note) => note.id !== noteId);
     setNotes(updatedNotes);
+    setPinnedNotes(updatedPinnedNotes);
     setFilteredNotes(updatedNotes);
+  };
+
+  const handlePin = (noteId) => {
+    const noteToPin = notes.find((note) => note.id === noteId);
+    if (noteToPin) {
+      noteToPin.isPinned = true;
+      setPinnedNotes([noteToPin, ...pinnedNotes]);
+      setNotes(notes.filter((note) => note.id !== noteId));
+      setFilteredNotes(notes.filter((note) => note.id !== noteId));
+    }
+  };
+
+  const handleUnpin = (noteId) => {
+    const noteToUnpin = pinnedNotes.find((note) => note.id === noteId);
+    if (noteToUnpin) {
+      noteToUnpin.isPinned = false;
+      setNotes([noteToUnpin, ...notes]);
+      setPinnedNotes(pinnedNotes.filter((note) => note.id !== noteId));
+      setFilteredNotes([noteToUnpin, ...notes]);
+    }
   };
 
   // Highlight matched text
@@ -106,15 +138,56 @@ const NotesList = () => {
 
   return (
     <>
-      <Header onSearch={setSearchTerm} onRefresh={fetchNotes} loading={loading} />
+      <Header
+        onSearch={setSearchTerm}
+        onRefresh={fetchNotes}
+        loading={loading}
+      />
       <div className="container">
+        <CreateNote onAddNote={handleAddNote} />
         {loading ? (
-          <Loader />
-        ) : filteredNotes.length === 0 ? (
-          <p>No notes found.</p>
+          <p>Loading notes...</p>
         ) : (
           <>
-            <CreateNote onAddNote={handleAddNote} fetchNotes={fetchNotes} />
+            {pinnedNotes.length > 0 && (
+              <div className="pinned-section">
+                <h3>Pinned Notes</h3>
+                <div className="note-list pinned-notes-list">
+                  {pinnedNotes.map((note) => (
+                    <div
+                      key={note.id}
+                      style={{
+                        background: note.color?.toLowerCase(),
+                        cursor: "pointer",
+                      }}
+                      className="item"
+                      onClick={() => {
+                        setSelectedNote(note);
+                        setVisible(true);
+                      }}
+                    >
+                      <div className="note-header-title">
+                        <div className="note-pin">
+                          <FaThumbtack
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleUnpin(note.id);
+                            }}
+                            style={{ color: "red" }}
+                          />
+                        </div>
+                        {note.title?.trim() && (
+                          <h4>{highlightText(note.title, searchTerm)}</h4>
+                        )}
+                      </div>
+                      {note.text_content?.trim() && (
+                        <p>{trimText(note.text_content, searchTerm)}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
             <div className="note-list">
               {filteredNotes.map((note) => (
                 <div
@@ -129,9 +202,22 @@ const NotesList = () => {
                     setVisible(true);
                   }}
                 >
-                  {note.title?.trim() && (
-                    <h4>{highlightText(note.title, searchTerm)}</h4>
-                  )}
+                  <div className="note-header-title">
+                    <div className="note-pin">
+                      <FaThumbtack
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handlePin(note.id);
+                        }}
+                        style={{ color: note.isPinned ? "red" : "black" }}
+                      />
+                    </div>
+
+                    {note.title?.trim() && (
+                      <h4>{highlightText(note.title, searchTerm)}</h4>
+                    )}
+                  </div>
+
                   {note.text_content?.trim() && (
                     <p>{trimText(note.text_content, searchTerm)}</p>
                   )}

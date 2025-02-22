@@ -1,7 +1,9 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { Toast } from "primereact/toast";
 import Loader from "./Loader/Loader";
+import BgColorOption from "./BGColorOption/BgColorOption";
+import { IoAttach } from "react-icons/io5";
 
 const API_URL = "https://gkeepbackend.campingx.net/postNote/";
 const API_TOKEN = "As#Jjjjj4qjo4r90m*NG&h8ha_839";
@@ -11,7 +13,9 @@ const CreateNote = ({ onAddNote, fetchNotes }) => {
   const [textContent, setTextContent] = useState("");
   const [isBodyVisible, setIsBodyVisible] = useState(false); // Controls visibility
   const [loading, setLoading] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
   const toast = useRef(null);
+  const colorPickerRef = useRef(null);
 
   const getColorBasedOnTitleLength = (title) => {
     const wordCount = title.trim().split(/\s+/).length;
@@ -40,6 +44,7 @@ const CreateNote = ({ onAddNote, fetchNotes }) => {
         userEditedTimestampUsec: "Test1",
         createdTimestampUsec: "Test2",
         sharees: "test3",
+        file_uploads: "",
       };
 
       const response = await axios.post(API_URL, request, {
@@ -71,6 +76,21 @@ const CreateNote = ({ onAddNote, fetchNotes }) => {
     }
   };
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        colorPickerRef.current &&
+        !colorPickerRef.current.contains(event.target)
+      ) {
+        setIsVisible(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
   return (
     <>
       <div className="create-note">
@@ -90,30 +110,41 @@ const CreateNote = ({ onAddNote, fetchNotes }) => {
               value={textContent}
               onChange={(e) => setTextContent(e.target.value)}
             />
-            <div className="cn-ftr-btn">
-              <button onClick={handleAddNote} className="add-Btn">
-                Create
-              </button>
-              <button
-                onClick={() => {
-                  setTitle("");
-                  setTextContent("");
-                  setIsBodyVisible(false); // Hide on close
-                }}
-                className="close-Btn"
-              >
-                Close
-              </button>
+            <div className="create-note-ftr">
+              <div className="cn-ftr-icons-left">
+                <div className="bg-color-options" ref={colorPickerRef}>
+                  <div
+                    className="bg-color-icon"
+                    title="Change color"
+                    onClick={() => setIsVisible(!isVisible)}
+                  ></div>
+                  {isVisible && <BgColorOption />}
+                </div>
+                <div className="attach-file">
+                  <IoAttach />
+                </div>
+              </div>
+              <div className="cn-ftr-btn">
+                <button onClick={handleAddNote} className="add-Btn">
+                  Create
+                </button>
+                <button
+                  onClick={() => {
+                    setTitle("");
+                    setTextContent("");
+                    setIsBodyVisible(false); // Hide on close
+                  }}
+                  className="close-Btn"
+                >
+                  Close
+                </button>
+              </div>
             </div>
           </div>
         )}
         <Toast ref={toast} />
       </div>
-      {loading && (
-        
-          <Loader />
-        
-      )}
+      {loading && <Loader />}
     </>
   );
 };
