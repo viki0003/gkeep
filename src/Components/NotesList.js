@@ -30,8 +30,8 @@ const NotesList = () => {
         (note) => note.title?.trim() || note.text_content?.trim()
       );
 
-      const pinned = validNotes.filter((note) => note.isPinned);
-      const unpinned = validNotes.filter((note) => !note.isPinned);
+      const pinned = validNotes.filter((note) => note.is_pinned);
+      const unpinned = validNotes.filter((note) => !note.is_pinned);
 
       setNotes(unpinned);
       setPinnedNotes(pinned);
@@ -73,23 +73,59 @@ const NotesList = () => {
     setFilteredNotes(updatedNotes);
   };
 
-  const handlePin = (noteId) => {
+  const handlePin = async (noteId) => {
     const noteToPin = notes.find((note) => note.id === noteId);
     if (noteToPin) {
-      noteToPin.isPinned = true;
-      setPinnedNotes([noteToPin, ...pinnedNotes]);
-      setNotes(notes.filter((note) => note.id !== noteId));
-      setFilteredNotes(notes.filter((note) => note.id !== noteId));
+      try {
+        const response = await axios.put(
+          `https://gkeepbackend.campingx.net/updateNote/?id=${noteToPin.id}`,
+          {
+            isPinned: true,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${API_TOKEN}`,
+            },
+          }
+        );
+
+        if (response.status === 200) {
+          noteToPin.isPinned = true;
+          setPinnedNotes([noteToPin, ...pinnedNotes]);
+          setNotes(notes.filter((note) => note.id !== noteId));
+          setFilteredNotes(notes.filter((note) => note.id !== noteId));
+        }
+      } catch (error) {
+        console.error("Error pinning note:", error);
+      }
     }
   };
 
-  const handleUnpin = (noteId) => {
+  const handleUnpin = async (noteId) => {
     const noteToUnpin = pinnedNotes.find((note) => note.id === noteId);
     if (noteToUnpin) {
-      noteToUnpin.isPinned = false;
-      setNotes([noteToUnpin, ...notes]);
-      setPinnedNotes(pinnedNotes.filter((note) => note.id !== noteId));
-      setFilteredNotes([noteToUnpin, ...notes]);
+      try {
+        const response = await axios.put(
+          `https://gkeepbackend.campingx.net/updateNote/?id=${noteToUnpin.id}`,
+          {
+            isPinned: false,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${API_TOKEN}`,
+            },
+          }
+        );
+
+        if (response.status === 200) {
+          noteToUnpin.isPinned = false;
+          setNotes([noteToUnpin, ...notes]);
+          setPinnedNotes(pinnedNotes.filter((note) => note.id !== noteId));
+          setFilteredNotes([noteToUnpin, ...notes]);
+        }
+      } catch (error) {
+        console.error("Error unpinning note:", error);
+      }
     }
   };
 
@@ -144,7 +180,7 @@ const NotesList = () => {
         loading={loading}
       />
       <div className="container">
-        <CreateNote onAddNote={handleAddNote} />
+        <CreateNote onAddNote={handleAddNote} fetchNotes={fetchNotes} />
         {loading ? (
           <p>Loading notes...</p>
         ) : (
@@ -152,12 +188,12 @@ const NotesList = () => {
             {pinnedNotes.length > 0 && (
               <div className="pinned-section">
                 <h3>Pinned Notes</h3>
-                <div className="note-list pinned-notes-list">
+                <div className="note-list">
                   {pinnedNotes.map((note) => (
                     <div
                       key={note.id}
                       style={{
-                        background: note.color?.toLowerCase(),
+                        background: note.bg_color?.toLowerCase(),
                         cursor: "pointer",
                       }}
                       className="item"
@@ -177,12 +213,61 @@ const NotesList = () => {
                           />
                         </div>
                         {note.title?.trim() && (
-                          <h4>{highlightText(note.title, searchTerm)}</h4>
+                          <h4
+                            style={{
+                              color: note.color?.toLowerCase(),
+                            }}
+                          >
+                            {highlightText(note.title, searchTerm)}
+                          </h4>
                         )}
                       </div>
                       {note.text_content?.trim() && (
-                        <p>{trimText(note.text_content, searchTerm)}</p>
+                        <p
+                          style={{
+                            color: note.color?.toLowerCase(),
+                          }}
+                        >
+                          {trimText(note.text_content, searchTerm)}
+                        </p>
                       )}
+                      {/* Image Section */}
+                      <div className="note-images-container">
+                        {note.file_uploads?.length > 0 && (
+                          <div
+                            className="note-images"
+                            style={{ display: "flex", gap: "5px" }}
+                          >
+                            {note.file_uploads.map((file, index) => (
+                              <div
+                                key={index}
+                                style={{
+                                  width: `${100 / note.file_uploads.length}%`,
+                                }}
+                              >
+                                {file.endsWith(".jpg") ||
+                                file.endsWith(".png") ||
+                                file.endsWith(".jpeg") ? (
+                                  <img
+                                    src={file}
+                                    alt="Note Attachment"
+                                    style={{ width: "100%", height: "auto" }}
+                                  />
+                                ) : (
+                                  <a
+                                    href={file}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="file-link"
+                                  >
+                                    View File
+                                  </a>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -193,7 +278,7 @@ const NotesList = () => {
                 <div
                   key={note.id}
                   style={{
-                    background: note.color?.toLowerCase(),
+                    background: note.bg_color?.toLowerCase(),
                     cursor: "pointer",
                   }}
                   className="item"
@@ -209,18 +294,65 @@ const NotesList = () => {
                           e.stopPropagation();
                           handlePin(note.id);
                         }}
-                        style={{ color: note.isPinned ? "red" : "black" }}
+                        style={{ color: note.is_pinned ? "red" : "black" }}
                       />
                     </div>
-
                     {note.title?.trim() && (
-                      <h4>{highlightText(note.title, searchTerm)}</h4>
+                      <h4
+                        style={{
+                          color: note.color?.toLowerCase(),
+                        }}
+                      >
+                        {highlightText(note.title, searchTerm)}
+                      </h4>
                     )}
                   </div>
-
                   {note.text_content?.trim() && (
-                    <p>{trimText(note.text_content, searchTerm)}</p>
+                    <p
+                      style={{
+                        color: note.color?.toLowerCase(),
+                      }}
+                    >
+                      {trimText(note.text_content, searchTerm)}
+                    </p>
                   )}
+                  {/* Image Section */}
+                  <div className="note-images-container">
+                    {note.file_uploads?.length > 0 && (
+                      <div
+                        className="note-images"
+                        style={{ display: "flex", gap: "5px" }}
+                      >
+                        {note.file_uploads.map((file, index) => (
+                          <div
+                            key={index}
+                            style={{
+                              width: `${100 / note.file_uploads.length}%`,
+                            }}
+                          >
+                            {file.endsWith(".jpg") ||
+                            file.endsWith(".png") ||
+                            file.endsWith(".jpeg") ? (
+                              <img
+                                src={file}
+                                alt="Note Attachment"
+                                style={{ width: "100%", height: "auto" }}
+                              />
+                            ) : (
+                              <a
+                                href={file}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="file-link"
+                              >
+                                View File
+                              </a>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>

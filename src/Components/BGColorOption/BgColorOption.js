@@ -16,7 +16,7 @@ const colors = [
 ];
 
 const textColors = [
- "#000000", // Default (for white background)
+  "#000000", // Default (for white background)
   "#a83232", // Darker red for #faafa8
   "#994d22", // Darker orange for #f39f76
   "#7a6a00", // Dark mustard for #fff8b8
@@ -28,7 +28,7 @@ const textColors = [
   "#6d6250", // Dark brown for #e9e3d4
 ];
 
-const NoteBgColor = () => {
+const NoteBgColor = ({ setBgColor, setTextColor }) => {
   const [selectedColor, setSelectedColor] = useState("#ffffff");
   const [selectedTextColor, setSelectedTextColor] = useState("#ffffff");
 
@@ -41,7 +41,10 @@ const NoteBgColor = () => {
             {colors.map((color, index) => (
               <button
                 key={index}
-                onClick={() => setSelectedColor(color)}
+                onClick={() => {
+                  setSelectedColor(color);
+                  setBgColor(color);
+                }}
                 className={`color-circle ${
                   selectedColor === color ? "selected" : ""
                 }`}
@@ -61,10 +64,17 @@ const NoteBgColor = () => {
             {textColors.map((color, index) => (
               <button
                 key={index}
-                onClick={() => setSelectedTextColor(color)}
+                onClick={() => {
+                  setSelectedTextColor(color);
+                  setTextColor(color);
+                }}
                 className={`color-circle ${
                   selectedTextColor === color ? "selected" : ""
-                } ${index === 0 && selectedTextColor === "#000000" ? "first-color" : ""}`}
+                } ${
+                  index === 0 && selectedTextColor === "#000000"
+                    ? "first-color"
+                    : ""
+                }`}
                 style={{ backgroundColor: color }}
               >
                 {selectedTextColor === color && (

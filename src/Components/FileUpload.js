@@ -1,9 +1,8 @@
-import React, { useRef, useState } from "react";
+import React, { useRef } from "react";
 import { Toast } from "primereact/toast";
 import { IoAttach } from "react-icons/io5";
 
-const FileUploader = () => {
-  const [files, setFiles] = useState([]);
+const FileUpload = ({ setFileUploads }) => {
   const toast = useRef(null);
 
   const handleFileSelect = (event) => {
@@ -25,15 +24,13 @@ const FileUploader = () => {
     });
 
     if (errors.length > 0) {
-      errors.forEach((error) => toast.current.show({
-        severity: "error",
-        summary: "Error",
-        detail: "Failed to create note",
-      }));
+      errors.forEach((error) =>
+        toast.current.show({ severity: "error", summary: "Error", detail: error })
+      );
     }
 
     if (validFiles.length > 0) {
-      setFiles(validFiles);
+      setFileUploads(validFiles); // Pass files to parent component
       toast.current.show({
         severity: "success",
         summary: "Success",
@@ -45,7 +42,7 @@ const FileUploader = () => {
   return (
     <div>
       <button onClick={() => document.getElementById("fileInput").click()}>
-      <IoAttach/>
+        <IoAttach />
       </button>
       <input
         type="file"
@@ -55,9 +52,9 @@ const FileUploader = () => {
         style={{ display: "none" }}
         onChange={handleFileSelect}
       />
-        <Toast ref={toast} />
+      <Toast ref={toast} />
     </div>
   );
 };
 
-export default FileUploader;
+export default FileUpload;

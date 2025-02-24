@@ -73,7 +73,7 @@ span.search-icon span {
 }
 
 .note-list .item p {
-  word-break: break-all;
+  word-break: break-word;
 }
 
 .note-list .item h4 {
@@ -203,8 +203,104 @@ button.add-Btn {
   display: flex;
 }
 
-.pinned-notes-list .item .note-pin {
+.pinned-section .note-pin {
   display: flex !important;
+}
+
+.pinned-section .note-list {
+  justify-content: flex-start;
+  margin-top: 25px;
+  margin-bottom: 50px;
+}
+
+.uploaded-files {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.file-preview {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #ccc;
+  padding: 8px;
+  border-radius: 5px;
+  background: #f9f9f9;
+}
+
+.file-preview img {
+  max-width: 100px;
+  max-height: 100px;
+  border-radius: 5px;
+}
+
+.file-info {
+  font-size: 14px;
+  padding: 5px;
+}
+
+.remove-file-btn {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: red;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0px;
+}
+
+.uploaded-files {
+  margin-bottom: 25px;
+}
+
+.uploaded-files {
+  margin-bottom: 25px;
+}
+
+.note-images-container {
+  margin-top: 20px;
+}
+
+.note-images-container .note-images {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  font-size: 12px;
+}
+
+.note-images-container .note-images div {
+  display: flex;
+  text-align: center;
+}
+
+.create-note input, .create-note textarea {
+  background: transparent;
+}
+
+.dialog-footer {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 15px;
+}
+
+.dialog-footer .color-picker-container {
+  top: 60px;
+}
+
+.dialog-footer h6 {
+  text-align: left;
 }
 @media (max-width: 991px) {
   .note-list .item {
