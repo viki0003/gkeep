@@ -1,7 +1,7 @@
 const CheckIcon = () => {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-      <g stroke-width="0" id="SVGRepo_bgCarrier"></g>
+      <g strokeWidth="0" id="SVGRepo_bgCarrier"></g>
       <g
         stroke-linejoin="round"
         stroke-linecap="round"
@@ -12,7 +12,7 @@ const CheckIcon = () => {
           <path
             stroke-linejoin="round"
             stroke-linecap="round"
-            stroke-width="2"
+            strokeWidth="2"
             stroke="#000"
             d="M6 12L10.2426 16.2426L18.727 7.75732"
             id="Vector"

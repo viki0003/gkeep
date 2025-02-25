@@ -80,7 +80,8 @@ const NotesList = () => {
         const response = await axios.put(
           `https://gkeepbackend.campingx.net/updateNote/?id=${noteToPin.id}`,
           {
-            isPinned: true,
+            ...noteToPin, // Include all existing note data
+            is_pinned: true, // Only updating the pinned status
           },
           {
             headers: {
@@ -88,9 +89,9 @@ const NotesList = () => {
             },
           }
         );
-
+  
         if (response.status === 200) {
-          noteToPin.isPinned = true;
+          noteToPin.is_pinned = true;
           setPinnedNotes([noteToPin, ...pinnedNotes]);
           setNotes(notes.filter((note) => note.id !== noteId));
           setFilteredNotes(notes.filter((note) => note.id !== noteId));
@@ -100,6 +101,7 @@ const NotesList = () => {
       }
     }
   };
+  
 
   const handleUnpin = async (noteId) => {
     const noteToUnpin = pinnedNotes.find((note) => note.id === noteId);
@@ -108,7 +110,8 @@ const NotesList = () => {
         const response = await axios.put(
           `https://gkeepbackend.campingx.net/updateNote/?id=${noteToUnpin.id}`,
           {
-            isPinned: false,
+            ...noteToUnpin, // Ensure all data remains intact
+            is_pinned: false,
           },
           {
             headers: {
@@ -116,9 +119,9 @@ const NotesList = () => {
             },
           }
         );
-
+  
         if (response.status === 200) {
-          noteToUnpin.isPinned = false;
+          noteToUnpin.is_pinned = false;
           setNotes([noteToUnpin, ...notes]);
           setPinnedNotes(pinnedNotes.filter((note) => note.id !== noteId));
           setFilteredNotes([noteToUnpin, ...notes]);
@@ -128,7 +131,7 @@ const NotesList = () => {
       }
     }
   };
-
+  
   // Highlight matched text
   const highlightText = (text, search) => {
     if (!search.trim()) return text;

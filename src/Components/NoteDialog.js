@@ -6,19 +6,18 @@ import BgColorOption from "./BGColorOption/BgColorOption";
 import axios from "axios";
 import Loader from "./Loader/Loader";
 import FileUpload from "./FileUpload";
+import { BsTrash } from "react-icons/bs";
 
 const NoteDialog = ({ visible, onHide, selectedNote, onUpdate, onDelete }) => {
   const [title, setTitle] = useState("");
   const [textContent, setTextContent] = useState("");
   const [isVisible, setIsVisible] = useState(false);
-  const [bgColor, setBgColor] = useState("#ffffff"); // Default color
-  const [textColor, setTextColor] = useState("#000000"); // Default color
-  const [files, setFiles] = useState([]); // Store files
+  const [bgColor, setBgColor] = useState("#ffffff");
+  const [textColor, setTextColor] = useState("#000000");
+  const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(false);
   const toast = useRef(null);
   const colorPickerRef = useRef(null);
-
-  console.log("This files", files);
 
   useEffect(() => {
     if (selectedNote) {
@@ -26,14 +25,10 @@ const NoteDialog = ({ visible, onHide, selectedNote, onUpdate, onDelete }) => {
       setTextContent(selectedNote.text_content);
       setBgColor(selectedNote.bg_color);
       setTextColor(selectedNote.color);
-      // Ensure files exist and are an array
-      if (selectedNote.files && Array.isArray(selectedNote.files)) {
-        setFiles(selectedNote.files);
-      } else {
-        setFiles([]); // Fallback to empty array
-      }
+      setFiles(selectedNote.file_uploads || []); // Fix: Correctly setting files from API response
     }
   }, [selectedNote]);
+
 
   const handleSave = async () => {
     setLoading(true);
@@ -45,6 +40,7 @@ const NoteDialog = ({ visible, onHide, selectedNote, onUpdate, onDelete }) => {
           text_content: textContent,
           bg_color: bgColor,
           color: textColor,
+          file_uploads: files,
         },
         {
           headers: {
@@ -52,13 +48,19 @@ const NoteDialog = ({ visible, onHide, selectedNote, onUpdate, onDelete }) => {
           },
         }
       );
+
       if (response.status === 200) {
         toast.current.show({
           severity: "success",
           summary: "Success",
           detail: "Note updated successfully",
         });
-        onUpdate({ ...selectedNote, title, text_content: textContent });
+        onUpdate({
+          ...selectedNote,
+          title,
+          text_content: textContent,
+          file_uploads: files,
+        });
         onHide();
       }
     } catch (error) {
@@ -142,21 +144,21 @@ const NoteDialog = ({ visible, onHide, selectedNote, onUpdate, onDelete }) => {
     </div>
   );
 
-   useEffect(() => {
-      const handleClickOutside = (event) => {
-        if (
-          colorPickerRef.current &&
-          !colorPickerRef.current.contains(event.target)
-        ) {
-          setIsVisible(false);
-        }
-      };
-  
-      document.addEventListener("mousedown", handleClickOutside);
-      return () => {
-        document.removeEventListener("mousedown", handleClickOutside);
-      };
-    }, []);
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        colorPickerRef.current &&
+        !colorPickerRef.current.contains(event.target)
+      ) {
+        setIsVisible(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   return (
     <Dialog
@@ -181,41 +183,58 @@ const NoteDialog = ({ visible, onHide, selectedNote, onUpdate, onDelete }) => {
             style={{
               width: "100%",
               height: "200px",
-              border: "1px solid #ccc",
               padding: "10px",
             }}
           />
 
-          {/* Files Section */}
+          {/* Image and File Display Section */}
           {files.length > 0 && (
             <div className="files-section">
               <h4>Files</h4>
-              <div className="file-list">
-                {files.map((file, index) => (
-                  <div key={index} className="file-item">
-                    {file.endsWith(".pdf") ? (
-                      <a
-                        href={file}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="pdf-link"
+              <div
+                className="file-list"
+                style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}
+              >
+                {files.map((file, index) => {
+                  const isImage = /\.(jpeg|jpg|png|gif|webp)$/i.test(file);
+                  const isPDF = /\.pdf$/i.test(file);
+
+                  return (
+                    <div key={index} className="file-item">
+                      {isImage ? (
+                        <img
+                          src={file}
+                          alt={`Uploaded ${index}`}
+                          className="file-thumbnail"
+                          style={{
+                            width: "100px",
+                            height: "100px",
+                            objectFit: "cover",
+                            borderRadius: "5px",
+                          }}
+                        />
+                      ) : isPDF ? (
+                        <a
+                          href={file}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="pdf-link"
+                          style={{ textDecoration: "none", color: "blue" }}
+                        >
+                          📄 {file.split("/").pop()}
+                        </a>
+                      ) : (
+                        <span>Unsupported file</span>
+                      )}
+                      <span
+                        className="img-remove-btn"
+                        onClick={() => handleRemoveFile(index)}
                       >
-                        {file.split("/").pop()}
-                      </a>
-                    ) : (
-                      <img
-                        src={file}
-                        alt="Uploaded"
-                        className="file-thumbnail"
-                      />
-                    )}
-                    <Button
-                      icon="pi pi-trash"
-                      className="p-button-danger p-button-sm"
-                      onClick={() => handleRemoveFile(index)}
-                    />
-                  </div>
-                ))}
+                        <BsTrash />
+                      </span>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}

@@ -302,6 +302,38 @@ button.add-Btn {
 .dialog-footer h6 {
   text-align: left;
 }
+
+.file-list .file-item {
+  width: 150px;
+  border: 1px solid #00000038 !important;
+  position: relative;
+  border-radius: 10px;
+  padding: 7px;
+}
+
+a.pdf-link {display: block;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;width: 125px;}
+
+span.img-remove-btn {
+  position: absolute;
+  top: -12px;
+  right: 10px;
+  background: #f7f7f7;
+  width: 25px;
+  height: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50px;
+  font-size: 13px;
+  border: 1px solid;
+}
+
+.file-list .file-item img.file-thumbnail {
+  width: 100% !important;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 5px;
+}
 @media (max-width: 991px) {
   .note-list .item {
     width: calc(50% - 25px);

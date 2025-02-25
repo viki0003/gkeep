@@ -161,6 +161,8 @@ const CreateNote = ({ fetchNotes }) => {
                     setTextContent("");
                     setFileUploads([]);
                     setIsBodyVisible(false);
+                    setBgColor("#ffffff"); // Reset to default background color
+    setTextColor("#000000"); // Reset to default text color
                   }}
                   className="close-Btn"
                 >
