@@ -334,6 +334,17 @@ span.img-remove-btn {
   object-fit: cover;
   border-radius: 5px;
 }
+
+.file-list {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.added-files-section {
+  margin-top: 25px;
+}
 @media (max-width: 991px) {
   .note-list .item {
     width: calc(50% - 25px);

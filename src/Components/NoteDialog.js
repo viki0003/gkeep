@@ -5,8 +5,8 @@ import { Toast } from "primereact/toast";
 import BgColorOption from "./BGColorOption/BgColorOption";
 import axios from "axios";
 import Loader from "./Loader/Loader";
-import FileUpload from "./FileUpload";
 import { BsTrash } from "react-icons/bs";
+import AddFiles from "./AddFiles";
 
 const NoteDialog = ({ visible, onHide, selectedNote, onUpdate, onDelete }) => {
   const [title, setTitle] = useState("");
@@ -15,6 +15,7 @@ const NoteDialog = ({ visible, onHide, selectedNote, onUpdate, onDelete }) => {
   const [bgColor, setBgColor] = useState("#ffffff");
   const [textColor, setTextColor] = useState("#000000");
   const [files, setFiles] = useState([]);
+  const [addedFiles, setAddedFiles] = useState([]);
   const [loading, setLoading] = useState(false);
   const toast = useRef(null);
   const colorPickerRef = useRef(null);
@@ -25,22 +26,52 @@ const NoteDialog = ({ visible, onHide, selectedNote, onUpdate, onDelete }) => {
       setTextContent(selectedNote.text_content);
       setBgColor(selectedNote.bg_color);
       setTextColor(selectedNote.color);
-      setFiles(selectedNote.file_uploads || []); // Fix: Correctly setting files from API response
+      setFiles(selectedNote.file_uploads || []);
     }
   }, [selectedNote]);
 
+  const handleFilesSelected = (selectedFiles) => {
+    setAddedFiles((prevFiles) => [...prevFiles, ...selectedFiles]);
+  };
 
   const handleSave = async () => {
     setLoading(true);
     try {
-      const response = await axios.put(
+      let uploadedFiles = [];
+      if (addedFiles.length > 0) {
+        const formData = new FormData();
+        addedFiles.forEach((file) => {
+          formData.append("file_uploads", file);
+        });
+
+        const uploadResponse = await axios.post(
+          `https://gkeepbackend.campingx.net/addFilesToNote/?id=${selectedNote.id}`,
+          formData,
+          {
+            headers: {
+              Authorization: "Bearer As#Jjjjj4qjo4r90m*NG&h8ha_839",
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+
+        if (uploadResponse.data.files.length > 0) {
+          uploadedFiles = uploadResponse.data.files.map((file) => file.file_url);
+        } else {
+          console.warn("No files returned from upload API.");
+        }
+      }
+
+      const updatedFiles = [...files, ...uploadedFiles];
+
+      const saveResponse = await axios.put(
         `https://gkeepbackend.campingx.net/updateNote/?id=${selectedNote.id}`,
         {
           title,
           text_content: textContent,
           bg_color: bgColor,
           color: textColor,
-          file_uploads: files,
+          file_uploads: updatedFiles,
         },
         {
           headers: {
@@ -49,21 +80,28 @@ const NoteDialog = ({ visible, onHide, selectedNote, onUpdate, onDelete }) => {
         }
       );
 
-      if (response.status === 200) {
+      if (saveResponse.status === 200) {
         toast.current.show({
           severity: "success",
           summary: "Success",
-          detail: "Note updated successfully",
+          detail: "Note updated successfully with files",
         });
+
         onUpdate({
           ...selectedNote,
           title,
           text_content: textContent,
-          file_uploads: files,
+          file_uploads: updatedFiles,
         });
+
+        setFiles(updatedFiles);
+        setAddedFiles([]);
         onHide();
+      } else {
+        console.warn("UpdateNote API did not return success.");
       }
     } catch (error) {
+      console.error("Error in handleSave:", error);
       toast.current.show({
         severity: "error",
         summary: "Error",
@@ -74,97 +112,35 @@ const NoteDialog = ({ visible, onHide, selectedNote, onUpdate, onDelete }) => {
     }
   };
 
-  const handleDelete = async () => {
-    if (!selectedNote) return;
-    setLoading(true);
-    try {
-      const response = await axios.delete(
-        `https://gkeepbackend.campingx.net/deleteNote/?id=${selectedNote.id}`,
-        {
-          headers: {
-            Authorization: "Bearer As#Jjjjj4qjo4r90m*NG&h8ha_839",
-          },
-        }
-      );
-
-      if (response.status === 200) {
-        toast.current.show({
-          severity: "success",
-          summary: "Deleted",
-          detail: "Note deleted successfully",
-        });
-        onDelete(selectedNote.id);
-        onHide();
-      }
-    } catch (error) {
-      toast.current.show({
-        severity: "error",
-        summary: "Error",
-        detail: "Failed to delete note",
-      });
-    } finally {
-      setLoading(false);
-    }
+  const handleRemoveFile = (index) => {
+    setFiles(files.filter((_, i) => i !== index));
   };
 
-  const handleRemoveFile = (index) => {
-    const updatedFiles = files.filter((_, i) => i !== index);
-    setFiles(updatedFiles);
+  const handleRemoveAddedFile = (index) => {
+    setAddedFiles(addedFiles.filter((_, i) => i !== index));
   };
 
   const footerContent = (
     <div className="dialog-footer">
       <div className="cn-ftr-icons-left">
         <div className="bg-color-options" ref={colorPickerRef}>
-          <div
-            className="bg-color-icon"
-            title="Change color"
-            onClick={() => setIsVisible(!isVisible)}
-          ></div>
-          {isVisible && (
-            <BgColorOption
-              setBgColor={setBgColor}
-              setTextColor={setTextColor}
-            />
-          )}
+          <div className="bg-color-icon" title="Change color" onClick={() => setIsVisible(!isVisible)}></div>
+          {isVisible && <BgColorOption setBgColor={setBgColor} setTextColor={setTextColor} />}
         </div>
         <div className="attach-file">
-          <FileUpload />
+          <AddFiles onFilesSelected={handleFilesSelected} />
         </div>
       </div>
       <div className="footer-btn">
-        <Button
-          label="Delete"
-          icon="pi pi-trash"
-          className="p-button-danger"
-          onClick={handleDelete}
-        />
+        <Button label="Delete" icon="pi pi-trash" className="p-button-danger" onClick={handleSave} />
         <Button label="Save" icon="pi pi-check" onClick={handleSave} />
       </div>
     </div>
   );
 
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (
-        colorPickerRef.current &&
-        !colorPickerRef.current.contains(event.target)
-      ) {
-        setIsVisible(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
-
   return (
     <Dialog
-      header={
-        <input value={title} onChange={(e) => setTitle(e.target.value)} />
-      }
+      header={<input value={title} onChange={(e) => setTitle(e.target.value)} />}
       visible={visible}
       style={{ width: "50vw" }}
       onHide={onHide}
@@ -180,56 +156,61 @@ const NoteDialog = ({ visible, onHide, selectedNote, onUpdate, onDelete }) => {
           <textarea
             value={textContent}
             onChange={(e) => setTextContent(e.target.value)}
-            style={{
-              width: "100%",
-              height: "200px",
-              padding: "10px",
-            }}
+            style={{ width: "100%", height: "200px", padding: "10px" }}
           />
 
-          {/* Image and File Display Section */}
+          {/* Displaying Existing Files */}
           {files.length > 0 && (
             <div className="files-section">
               <h4>Files</h4>
-              <div
-                className="file-list"
-                style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}
-              >
+              <div className="file-list">
                 {files.map((file, index) => {
-                  const isImage = /\.(jpeg|jpg|png|gif|webp)$/i.test(file);
-                  const isPDF = /\.pdf$/i.test(file);
+                  const url = file.file_url || file;
+                  const isImage = /\.(jpeg|jpg|png|gif|webp)$/i.test(url);
+                  const isPDF = /\.pdf$/i.test(url);
 
                   return (
                     <div key={index} className="file-item">
                       {isImage ? (
-                        <img
-                          src={file}
-                          alt={`Uploaded ${index}`}
-                          className="file-thumbnail"
-                          style={{
-                            width: "100px",
-                            height: "100px",
-                            objectFit: "cover",
-                            borderRadius: "5px",
-                          }}
-                        />
+                        <img src={url} alt={`Uploaded ${index}`} className="file-thumbnail" />
                       ) : isPDF ? (
-                        <a
-                          href={file}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="pdf-link"
-                          style={{ textDecoration: "none", color: "blue" }}
-                        >
-                          📄 {file.split("/").pop()}
+                        <a href={url} target="_blank" rel="noopener noreferrer" className="pdf-link">
+                          📄 {url.split("/").pop()}
                         </a>
                       ) : (
                         <span>Unsupported file</span>
                       )}
-                      <span
-                        className="img-remove-btn"
-                        onClick={() => handleRemoveFile(index)}
-                      >
+                      <span className="img-remove-btn" onClick={() => handleRemoveFile(index)}>
+                        <BsTrash />
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Displaying Newly Added Files */}
+          {addedFiles.length > 0 && (
+            <div className="added-files-section">
+              <h4>Added Files</h4>
+              <div className="file-list">
+                {addedFiles.map((file, index) => {
+                  const isImage = /\.(jpeg|jpg|png|gif|webp)$/i.test(file.name);
+                  const isPDF = /\.pdf$/i.test(file.name);
+
+                  return (
+                    <div key={index} className="file-item">
+                      {isImage ? (
+                        <img src={URL.createObjectURL(file)} alt={`Added ${index}`} className="file-thumbnail" />
+                      ) : isPDF ? (
+                        <a href={URL.createObjectURL(file)} target="_blank" rel="noopener noreferrer" className="pdf-link">
+                          📄 {file.name}
+                        </a>
+                      ) : (
+                        <span>Unsupported file</span>
+                      )}
+                      <span className="img-remove-btn" onClick={() => handleRemoveAddedFile(index)}>
                         <BsTrash />
                       </span>
                     </div>
