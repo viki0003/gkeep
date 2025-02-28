@@ -70,6 +70,7 @@ span.search-icon span {
   padding: 15px;
   border: 1px solid #dadce0;
   border-radius: 6px;
+  word-break: break-word;
 }
 
 .note-list .item p {
@@ -309,6 +310,7 @@ button.add-Btn {
   position: relative;
   border-radius: 10px;
   padding: 7px;
+  background: #fff;
 }
 
 a.pdf-link {display: block;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;width: 125px;}
@@ -344,6 +346,48 @@ span.img-remove-btn {
 
 .added-files-section {
   margin-top: 25px;
+}
+
+a.url-link {
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.content-editable {
+  outline: none;
+  border: 0px;
+}
+
+.p-dialog-header, .p-dialog-header input, .p-dialog-footer, .p-dialog-content {
+  background: transparent;
+}
+
+.ce-wrapper {
+  position: relative;
+  margin-top: 12px;
+}
+
+.create-note .cn-header input {
+  padding: 0;
+    font-size: 1rem;
+    font-weight: 500;
+    line-height: 1.5rem;
+}
+
+.cn-body .ce-wrapper p {
+  letter-spacing: .0142857143em;
+  font-family: Roboto, Arial, sans-serif;
+  font-size: .875rem;
+  font-weight: 400;
+  line-height: 1.25rem;
+  color: rgb(32,33,36);
+  position: absolute;
+  top: 4px;
+  z-index: 0;
+}
+
+.ce-wrapper {
+  position: relative;
 }
 @media (max-width: 991px) {
   .note-list .item {

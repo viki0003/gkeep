@@ -7,6 +7,8 @@ import axios from "axios";
 import Loader from "./Loader/Loader";
 import { BsTrash } from "react-icons/bs";
 import AddFiles from "./AddFiles";
+import ContentEditable from "react-contenteditable";
+import { Tooltip } from "primereact/tooltip";
 
 const NoteDialog = ({ visible, onHide, selectedNote, onUpdate, onDelete }) => {
   const [title, setTitle] = useState("");
@@ -19,12 +21,56 @@ const NoteDialog = ({ visible, onHide, selectedNote, onUpdate, onDelete }) => {
   const [loading, setLoading] = useState(false);
   const toast = useRef(null);
   const colorPickerRef = useRef(null);
+  const contentEditableRef = useRef(null);
+
+  const formatTextWithLinks = (text) => {
+    if (!text) return "";
+
+    const strippedText = text.replace(/<a[^>]*>(.*?)<\/a>/g, "$1");
+
+    const urlRegex =
+      /((?:https?:\/\/)?(?:www\.)?[a-zA-Z0-9-]+(?:\.[a-zA-Z]{2,})+(?:\/[^\s]*)?)/g;
+
+    return strippedText.replace(urlRegex, (url) => {
+      if (url.includes("<a") || url.includes("</a>")) return url;
+
+      const fullUrl = url.startsWith("www.") ? `http://${url}` : url;
+      const finalUrl = fullUrl.startsWith("http")
+        ? fullUrl
+        : `http://${fullUrl}`;
+      return `<a href="${finalUrl}" class="url-link" data-pr-tooltip="Open URL" data-pr-position="top">${url}</a>`;
+    });
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        colorPickerRef.current &&
+        !colorPickerRef.current.contains(event.target)
+      ) {
+        setIsVisible(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const handleContentChange = (evt) => {
+    const text = evt.target.value;
+    if (text !== textContent) {
+      const formattedText = formatTextWithLinks(text);
+      setTextContent(formattedText);
+    }
+  };
 
   useEffect(() => {
     if (selectedNote) {
       setTitle(selectedNote.title);
       setTextContent(selectedNote.text_content);
-      setBgColor(selectedNote.bg_color);
+      setBgColor(selectedNote.bg_color || "#ffffff");
       setTextColor(selectedNote.color);
       setFiles(selectedNote.file_uploads || []);
     }
@@ -56,7 +102,9 @@ const NoteDialog = ({ visible, onHide, selectedNote, onUpdate, onDelete }) => {
         );
 
         if (uploadResponse.data.files.length > 0) {
-          uploadedFiles = uploadResponse.data.files.map((file) => file.file_url);
+          uploadedFiles = uploadResponse.data.files.map(
+            (file) => file.file_url
+          );
         } else {
           console.warn("No files returned from upload API.");
         }
@@ -90,6 +138,8 @@ const NoteDialog = ({ visible, onHide, selectedNote, onUpdate, onDelete }) => {
         onUpdate({
           ...selectedNote,
           title,
+          bg_color: bgColor,
+          color: textColor,
           text_content: textContent,
           file_uploads: updatedFiles,
         });
@@ -112,6 +162,39 @@ const NoteDialog = ({ visible, onHide, selectedNote, onUpdate, onDelete }) => {
     }
   };
 
+  const handleDelete = async () => {
+    if (!selectedNote) return;
+    setLoading(true);
+    try {
+      const response = await axios.delete(
+        `https://gkeepbackend.campingx.net/deleteNote/?id=${selectedNote.id}`,
+        {
+          headers: {
+            Authorization: "Bearer As#Jjjjj4qjo4r90m*NG&h8ha_839",
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        toast.current.show({
+          severity: "success",
+          summary: "Deleted",
+          detail: "Note deleted successfully",
+        });
+        onDelete(selectedNote.id);
+        onHide();
+      }
+    } catch (error) {
+      toast.current.show({
+        severity: "error",
+        summary: "Error",
+        detail: "Failed to delete note",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleRemoveFile = (index) => {
     setFiles(files.filter((_, i) => i !== index));
   };
@@ -124,104 +207,192 @@ const NoteDialog = ({ visible, onHide, selectedNote, onUpdate, onDelete }) => {
     <div className="dialog-footer">
       <div className="cn-ftr-icons-left">
         <div className="bg-color-options" ref={colorPickerRef}>
-          <div className="bg-color-icon" title="Change color" onClick={() => setIsVisible(!isVisible)}></div>
-          {isVisible && <BgColorOption setBgColor={setBgColor} setTextColor={setTextColor} />}
+          <div
+            className="bg-color-icon"
+            title="Change color"
+            onClick={() => setIsVisible(!isVisible)}
+          ></div>
+          {isVisible && (
+            <BgColorOption
+              setBgColor={setBgColor}
+              setTextColor={setTextColor}
+            />
+          )}
         </div>
         <div className="attach-file">
           <AddFiles onFilesSelected={handleFilesSelected} />
         </div>
       </div>
       <div className="footer-btn">
-        <Button label="Delete" icon="pi pi-trash" className="p-button-danger" onClick={handleSave} />
+        <Button
+          label="Delete"
+          icon="pi pi-trash"
+          className="p-button-danger"
+          onClick={handleDelete}
+        />
         <Button label="Save" icon="pi pi-check" onClick={handleSave} />
       </div>
     </div>
   );
 
+  useEffect(() => {
+    if (loading) {
+      document.body.classList.add('overflow-hidden');
+    } else {
+      document.body.classList.remove('overflow-hidden');
+    }
+    
+    return () => {
+      document.body.classList.remove('overflow-hidden');
+    };
+  }, [loading]);
+
   return (
-    <Dialog
-      header={<input value={title} onChange={(e) => setTitle(e.target.value)} />}
-      visible={visible}
-      style={{ width: "50vw" }}
-      onHide={onHide}
-      draggable={false}
-      className="note-dialog-cstm"
-      footer={footerContent}
-    >
+    <>
       <Toast ref={toast} />
       {loading ? (
         <Loader />
       ) : (
         <>
-          <textarea
+          <Dialog
+            header={
+              <input
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                style={{ color: textColor }}
+              />
+            }
+            visible={visible}
+            style={{ width: "50vw", backgroundColor: bgColor || "#ffffff" }}
+            onHide={onHide}
+            draggable={false}
+            className="note-dialog-cstm"
+            footer={footerContent}
+          >
+            <Tooltip target=".url-link" />
+            <ContentEditable
+              innerRef={contentEditableRef}
+              html={formatTextWithLinks(textContent)}
+              disabled={false}
+              onChange={handleContentChange}
+              className="content-editable"
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  document.execCommand("insertLineBreak");
+                  e.preventDefault();
+                }
+              }}
+              onClick={(e) => {
+                if (e.target.tagName === "A") {
+                  window.open(e.target.href, "_blank");
+                  e.preventDefault();
+                }
+              }}
+              tagName="div"
+              style={{
+                width: "100%",
+                minHeight: "50px",
+                overflowY: "auto",
+                backgroundColor: bgColor,
+                color: textColor,
+              }}
+            />
+            {/* <textarea
             value={textContent}
             onChange={(e) => setTextContent(e.target.value)}
             style={{ width: "100%", height: "200px", padding: "10px" }}
-          />
+          /> */}
 
-          {/* Displaying Existing Files */}
-          {files.length > 0 && (
-            <div className="files-section">
-              <h4>Files</h4>
-              <div className="file-list">
-                {files.map((file, index) => {
-                  const url = file.file_url || file;
-                  const isImage = /\.(jpeg|jpg|png|gif|webp)$/i.test(url);
-                  const isPDF = /\.pdf$/i.test(url);
+            {/* Displaying Existing Files */}
+            {files.length > 0 && (
+              <div className="files-section">
+                <h4>Files</h4>
+                <div className="file-list">
+                  {files.map((file, index) => {
+                    const url = file.file_url || file;
+                    const isImage = /\.(jpeg|jpg|png|gif|webp)$/i.test(url);
+                    const isPDF = /\.pdf$/i.test(url);
 
-                  return (
-                    <div key={index} className="file-item">
-                      {isImage ? (
-                        <img src={url} alt={`Uploaded ${index}`} className="file-thumbnail" />
-                      ) : isPDF ? (
-                        <a href={url} target="_blank" rel="noopener noreferrer" className="pdf-link">
-                          📄 {url.split("/").pop()}
-                        </a>
-                      ) : (
-                        <span>Unsupported file</span>
-                      )}
-                      <span className="img-remove-btn" onClick={() => handleRemoveFile(index)}>
-                        <BsTrash />
-                      </span>
-                    </div>
-                  );
-                })}
+                    return (
+                      <div key={index} className="file-item">
+                        {isImage ? (
+                          <img
+                            src={url}
+                            alt={`Uploaded ${index}`}
+                            className="file-thumbnail"
+                          />
+                        ) : isPDF ? (
+                          <a
+                            href={url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="pdf-link"
+                          >
+                            📄 {url.split("/").pop()}
+                          </a>
+                        ) : (
+                          <span>Unsupported file</span>
+                        )}
+                        <span
+                          className="img-remove-btn"
+                          onClick={() => handleRemoveFile(index)}
+                        >
+                          <BsTrash />
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Displaying Newly Added Files */}
-          {addedFiles.length > 0 && (
-            <div className="added-files-section">
-              <h4>Added Files</h4>
-              <div className="file-list">
-                {addedFiles.map((file, index) => {
-                  const isImage = /\.(jpeg|jpg|png|gif|webp)$/i.test(file.name);
-                  const isPDF = /\.pdf$/i.test(file.name);
+            {/* Displaying Newly Added Files */}
+            {addedFiles.length > 0 && (
+              <div className="added-files-section">
+                <h4>Added Files</h4>
+                <div className="file-list">
+                  {addedFiles.map((file, index) => {
+                    const isImage = /\.(jpeg|jpg|png|gif|webp)$/i.test(
+                      file.name
+                    );
+                    const isPDF = /\.pdf$/i.test(file.name);
 
-                  return (
-                    <div key={index} className="file-item">
-                      {isImage ? (
-                        <img src={URL.createObjectURL(file)} alt={`Added ${index}`} className="file-thumbnail" />
-                      ) : isPDF ? (
-                        <a href={URL.createObjectURL(file)} target="_blank" rel="noopener noreferrer" className="pdf-link">
-                          📄 {file.name}
-                        </a>
-                      ) : (
-                        <span>Unsupported file</span>
-                      )}
-                      <span className="img-remove-btn" onClick={() => handleRemoveAddedFile(index)}>
-                        <BsTrash />
-                      </span>
-                    </div>
-                  );
-                })}
+                    return (
+                      <div key={index} className="file-item">
+                        {isImage ? (
+                          <img
+                            src={URL.createObjectURL(file)}
+                            alt={`Added ${index}`}
+                            className="file-thumbnail"
+                          />
+                        ) : isPDF ? (
+                          <a
+                            href={URL.createObjectURL(file)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="pdf-link"
+                          >
+                            📄 {file.name}
+                          </a>
+                        ) : (
+                          <span>Unsupported file</span>
+                        )}
+                        <span
+                          className="img-remove-btn"
+                          onClick={() => handleRemoveAddedFile(index)}
+                        >
+                          <BsTrash />
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </Dialog>
         </>
       )}
-    </Dialog>
+    </>
   );
 };
 

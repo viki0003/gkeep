@@ -4,6 +4,8 @@ import NoteDialog from "./NoteDialog";
 import Header from "./Header";
 import CreateNote from "./CreateNote";
 import { FaThumbtack } from "react-icons/fa";
+import ContentEditable from "react-contenteditable";
+import { Tooltip } from "primereact/tooltip";
 
 const API_URL = "https://gkeepbackend.campingx.net/getNotes/";
 const API_TOKEN = "As#Jjjjj4qjo4r90m*NG&h8ha_839";
@@ -89,7 +91,7 @@ const NotesList = () => {
             },
           }
         );
-  
+
         if (response.status === 200) {
           noteToPin.is_pinned = true;
           setPinnedNotes([noteToPin, ...pinnedNotes]);
@@ -101,7 +103,6 @@ const NotesList = () => {
       }
     }
   };
-  
 
   const handleUnpin = async (noteId) => {
     const noteToUnpin = pinnedNotes.find((note) => note.id === noteId);
@@ -119,7 +120,7 @@ const NotesList = () => {
             },
           }
         );
-  
+
         if (response.status === 200) {
           noteToUnpin.is_pinned = false;
           setNotes([noteToUnpin, ...notes]);
@@ -131,7 +132,7 @@ const NotesList = () => {
       }
     }
   };
-  
+
   // Highlight matched text
   const highlightText = (text, search) => {
     if (!search.trim()) return text;
@@ -168,12 +169,47 @@ const NotesList = () => {
 
     const filtered = notes.filter(
       (note) =>
-        note.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        note.text_content?.toLowerCase().includes(searchTerm.toLowerCase())
+        (note.title?.trim() || note.text_content?.trim()) && 
+        (note.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+         note.text_content?.toLowerCase().includes(searchTerm.toLowerCase()))
     );
 
     setFilteredNotes(filtered);
   }, [searchTerm, notes]);
+
+  const formatTextWithLinks = (text) => {
+    // Handle null, undefined, or non-string values
+    if (!text || typeof text !== "string") {
+      return "";
+    }
+
+    const strippedText = text.replace(/<a[^>]*>(.*?)<\/a>/g, "$1");
+
+    const urlRegex =
+      /((?:https?:\/\/)?(?:www\.)?[a-zA-Z0-9-]+(?:\.[a-zA-Z]{2,})+(?:\/[^\s]*)?)/g;
+
+    return strippedText.replace(urlRegex, (url) => {
+      if (url.includes("<a") || url.includes("</a>")) return url;
+
+      const fullUrl = url.startsWith("www.") ? `http://${url}` : url;
+      const finalUrl = fullUrl.startsWith("http")
+        ? fullUrl
+        : `http://${fullUrl}`;
+      return `<a href="${finalUrl}" class="url-link" data-pr-tooltip="Open Url" data-pr-position="top">${url}</a>`;
+    });
+  };
+
+  useEffect(() => {
+    if (loading) {
+      document.body.classList.add('overflow-hidden');
+    } else {
+      document.body.classList.remove('overflow-hidden');
+    }
+    
+    return () => {
+      document.body.classList.remove('overflow-hidden');
+    };
+  }, [loading]);
 
   return (
     <>
@@ -225,14 +261,29 @@ const NotesList = () => {
                           </h4>
                         )}
                       </div>
-                      {note.text_content?.trim() && (
-                        <p
+                      <Tooltip target=".url-link" />
+                      {note.text_content?.trim() ? (
+                        <ContentEditable
+                          html={formatTextWithLinks(
+                            trimText(note.text_content, searchTerm)
+                          )}
+                          disabled={true}
+                          onChange={() => {}}
+                          tagName="div"
                           style={{
                             color: note.color?.toLowerCase(),
+                            cursor: "text",
+                            padding: "8px 0",
                           }}
-                        >
-                          {trimText(note.text_content, searchTerm)}
-                        </p>
+                          onClick={(e) => {
+                            if (e.target.tagName === "A") {
+                              window.open(e.target.href, "_blank");
+                              e.preventDefault();
+                            }
+                          }}
+                        />
+                      ) : (
+                        console.warn("No Text Found")
                       )}
                       {/* Image Section */}
                       <div className="note-images-container">
@@ -277,87 +328,109 @@ const NotesList = () => {
               </div>
             )}
             <div className="note-list">
-              {filteredNotes.map((note) => (
-                <div
-                  key={note.id}
-                  style={{
-                    background: note.bg_color?.toLowerCase(),
-                    cursor: "pointer",
-                  }}
-                  className="item"
-                  onClick={() => {
-                    setSelectedNote(note);
-                    setVisible(true);
-                  }}
-                >
-                  <div className="note-header-title">
-                    <div className="note-pin">
-                      <FaThumbtack
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handlePin(note.id);
-                        }}
-                        style={{ color: note.is_pinned ? "red" : "black" }}
-                      />
+              {filteredNotes
+                .filter(
+                  (note) =>
+                    note.title?.trim() ||
+                    note.text_content?.trim() ||
+                    (note.file_uploads && note.file_uploads.length > 0)
+                )
+                .map((note) => (
+                  <div
+                    key={note.id}
+                    style={{
+                      background: note.bg_color?.toLowerCase(),
+                      cursor: "pointer",
+                    }}
+                    className="item"
+                    onClick={() => {
+                      setSelectedNote(note);
+                      setVisible(true);
+                    }}
+                  >
+                    <div className="note-header-title">
+                      <div className="note-pin">
+                        <FaThumbtack
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handlePin(note.id);
+                          }}
+                          style={{ color: note.is_pinned ? "red" : "black" }}
+                        />
+                      </div>
+                      {note.title?.trim() && (
+                        <h4
+                          style={{
+                            color: note.color?.toLowerCase(),
+                          }}
+                        >
+                          {highlightText(note.title, searchTerm)}
+                        </h4>
+                      )}
                     </div>
-                    {note.title?.trim() && (
-                      <h4
+                    <Tooltip target=".url-link" />
+                    {note.text_content?.trim() ? (
+                      <ContentEditable
+                        html={formatTextWithLinks(
+                          trimText(note.text_content, searchTerm)
+                        )}
+                        disabled={true}
+                        onChange={() => {}}
+                        tagName="div"
                         style={{
                           color: note.color?.toLowerCase(),
+                          cursor: "text",
+                          padding: "8px 0",
                         }}
-                      >
-                        {highlightText(note.title, searchTerm)}
-                      </h4>
+                        onClick={(e) => {
+                          if (e.target.tagName === "A") {
+                            window.open(e.target.href, "_blank");
+                            e.preventDefault();
+                          }
+                        }}
+                      />
+                    ) : (
+                      console.warn("NO Text Found")
                     )}
+                    {/* Image Section */}
+                    <div className="note-images-container">
+                      {note.file_uploads?.length > 0 && (
+                        <div
+                          className="note-images"
+                          style={{ display: "flex", gap: "5px" }}
+                        >
+                          {note.file_uploads.map((file, index) => (
+                            <div
+                              key={index}
+                              style={{
+                                width: `${100 / note.file_uploads.length}%`,
+                              }}
+                            >
+                              {file.endsWith(".jpg") ||
+                              file.endsWith(".png") ||
+                              file.endsWith(".jpeg") ? (
+                                <img
+                                  src={file}
+                                  alt="Note Attachment"
+                                  style={{ width: "100%", height: "auto" }}
+                                />
+                              ) : (
+                                <a
+                                  href={file}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="file-link"
+                                >
+                                  View File
+                                </a>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  {note.text_content?.trim() && (
-                    <p
-                      style={{
-                        color: note.color?.toLowerCase(),
-                      }}
-                    >
-                      {trimText(note.text_content, searchTerm)}
-                    </p>
-                  )}
-                  {/* Image Section */}
-                  <div className="note-images-container">
-                    {note.file_uploads?.length > 0 && (
-                      <div
-                        className="note-images"
-                        style={{ display: "flex", gap: "5px" }}
-                      >
-                        {note.file_uploads.map((file, index) => (
-                          <div
-                            key={index}
-                            style={{
-                              width: `${100 / note.file_uploads.length}%`,
-                            }}
-                          >
-                            {file.endsWith(".jpg") ||
-                            file.endsWith(".png") ||
-                            file.endsWith(".jpeg") ? (
-                              <img
-                                src={file}
-                                alt="Note Attachment"
-                                style={{ width: "100%", height: "auto" }}
-                              />
-                            ) : (
-                              <a
-                                href={file}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="file-link"
-                              >
-                                View File
-                              </a>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
+                ))}
             </div>
           </>
         )}

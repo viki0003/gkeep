@@ -5,6 +5,8 @@ import Loader from "./Loader/Loader";
 import BgColorOption from "./BGColorOption/BgColorOption";
 import FileUploader from "./FileUpload";
 import { IoClose } from "react-icons/io5"; // Close icon
+import ContentEditable from "react-contenteditable";
+import { Tooltip } from "primereact/tooltip";
 
 const API_URL = "https://gkeepbackend.campingx.net/postNote/";
 const API_TOKEN = "As#Jjjjj4qjo4r90m*NG&h8ha_839";
@@ -20,9 +22,11 @@ const CreateNote = ({ fetchNotes }) => {
   const [textColor, setTextColor] = useState("#000000"); // Default color
   const toast = useRef(null);
   const colorPickerRef = useRef(null);
+  const contentEditableRef = useRef(null);
 
   const handleAddNote = async () => {
-    if (!title.trim() && !textContent.trim() && fileUploads.length === 0) return;
+    if (!title.trim() && !textContent.trim() && fileUploads.length === 0)
+      return;
     setLoading(true);
     try {
       // const color = getColorBasedOnTitleLength(title);
@@ -91,9 +95,48 @@ const CreateNote = ({ fetchNotes }) => {
     };
   }, []);
 
+  const formatTextWithLinks = (text) => {
+    if (!text) return "";
+
+    const strippedText = text.replace(/<a[^>]*>(.*?)<\/a>/g, "$1");
+
+    const urlRegex =
+      /((?:https?:\/\/)?(?:www\.)?[a-zA-Z0-9-]+(?:\.[a-zA-Z]{2,})+(?:\/[^\s]*)?)/g;
+
+    return strippedText.replace(urlRegex, (url) => {
+      if (url.includes("<a") || url.includes("</a>")) return url;
+
+      const fullUrl = url.startsWith("www.") ? `http://${url}` : url;
+      const finalUrl = fullUrl.startsWith("http")
+        ? fullUrl
+        : `http://${fullUrl}`;
+      return `<a href="${finalUrl}" class="url-link" data-pr-tooltip="Click to open ${url}" data-pr-position="top">${url}</a>`;
+    });
+  };
+
+  const handleContentChange = (evt) => {
+    const text = evt.target.value;
+    if (text !== textContent) {
+      const formattedText = formatTextWithLinks(text);
+      setTextContent(formattedText);
+    }
+  };
+
   const removeFile = (index) => {
     setFileUploads((prevFiles) => prevFiles.filter((_, i) => i !== index));
   };
+
+  useEffect(() => {
+    if (loading) {
+      document.body.classList.add("overflow-hidden");
+    } else {
+      document.body.classList.remove("overflow-hidden");
+    }
+
+    return () => {
+      document.body.classList.remove("overflow-hidden");
+    };
+  }, [loading]);
 
   return (
     <>
@@ -110,13 +153,41 @@ const CreateNote = ({ fetchNotes }) => {
         </div>
         {isBodyVisible && (
           <div className="cn-body">
-            <textarea
+            {/* <textarea
               placeholder="Take a note..."
               value={textContent}
               onChange={(e) => setTextContent(e.target.value)}
               style={{ color: textColor }}
-            />
+            /> */}
 
+            <Tooltip target=".url-link" />
+            <div className="ce-wrapper">
+            {(!textContent || textContent === '<br>') && (
+              <p onClick={() => contentEditableRef.current?.focus()}>Take a note...</p>
+            )}
+              <ContentEditable
+               innerRef={contentEditableRef}
+                html={textContent}
+                disabled={false}
+                onChange={handleContentChange}
+                placeholder="Take a note..."
+                tagName="div"
+                className="content-editable create-note-textarea"
+                style={{
+                  width: "100%",
+                  minHeight: "50px",
+                  color: textColor,
+                  backgroundColor: bgColor,
+                  resize: "none",
+                }}
+                onClick={(e) => {
+                  if (e.target.tagName === "A") {
+                    window.open(e.target.href, "_blank");
+                    e.preventDefault();
+                  }
+                }}
+              />
+            </div>
             {/* Display Uploaded Files */}
             {fileUploads.length > 0 && (
               <div className="uploaded-files">
@@ -129,7 +200,10 @@ const CreateNote = ({ fetchNotes }) => {
                         <span>{file.name}</span>
                       </div>
                     )}
-                    <button className="remove-file-btn" onClick={() => removeFile(index)}>
+                    <button
+                      className="remove-file-btn"
+                      onClick={() => removeFile(index)}
+                    >
                       <IoClose />
                     </button>
                   </div>
@@ -145,7 +219,12 @@ const CreateNote = ({ fetchNotes }) => {
                     title="Change color"
                     onClick={() => setIsVisible(!isVisible)}
                   ></div>
-                  {isVisible && <BgColorOption setBgColor={setBgColor} setTextColor={setTextColor} />}
+                  {isVisible && (
+                    <BgColorOption
+                      setBgColor={setBgColor}
+                      setTextColor={setTextColor}
+                    />
+                  )}
                 </div>
                 <div className="attach-file">
                   <FileUploader setFileUploads={setFileUploads} />
@@ -162,7 +241,7 @@ const CreateNote = ({ fetchNotes }) => {
                     setFileUploads([]);
                     setIsBodyVisible(false);
                     setBgColor("#ffffff"); // Reset to default background color
-    setTextColor("#000000"); // Reset to default text color
+                    setTextColor("#000000"); // Reset to default text color
                   }}
                   className="close-Btn"
                 >
