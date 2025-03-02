@@ -166,35 +166,48 @@ const NoteDialog = ({ visible, onHide, selectedNote, onUpdate, onDelete }) => {
     if (!selectedNote) return;
     setLoading(true);
     try {
-      const response = await axios.delete(
-        `https://gkeepbackend.campingx.net/deleteNote/?id=${selectedNote.id}`,
+      const response = await axios.put(
+        `https://gkeepbackend.campingx.net/updateNote/?id=${selectedNote.id}`,
+        {
+          is_archived: true,
+          title: selectedNote.title,
+          text_content: selectedNote.text_content,
+          bg_color: selectedNote.bg_color,
+          color: selectedNote.color,
+          file_uploads: selectedNote.file_uploads
+        },
         {
           headers: {
             Authorization: "Bearer As#Jjjjj4qjo4r90m*NG&h8ha_839",
           },
         }
       );
-
+  
+      console.log("API Response:", response.data); // Debugging line
+  
       if (response.status === 200) {
         toast.current.show({
           severity: "success",
-          summary: "Deleted",
-          detail: "Note deleted successfully",
+          summary: "Archived",
+          detail: "Note archived successfully",
         });
         onDelete(selectedNote.id);
         onHide();
       }
     } catch (error) {
+      console.error("Error archiving note:", error);
       toast.current.show({
         severity: "error",
         summary: "Error",
-        detail: "Failed to delete note",
+        detail: "Failed to archive note",
       });
     } finally {
       setLoading(false);
     }
   };
-
+  
+  
+  
   const handleRemoveFile = (index) => {
     setFiles(files.filter((_, i) => i !== index));
   };
