@@ -1,5 +1,5 @@
 import React from "react";
-import NotesList from "../../Components/NotesList";
+import NotesList from "../../Components/Notes/NoteList/NotesList";
 
 const Home = () => {
     return (

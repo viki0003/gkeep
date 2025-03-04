@@ -1,0 +1,27 @@
+
+.note-dialog-cstm .p-dialog-header .p-dialog-title input {
+    width: 100%;
+    font-size: 1.375rem;
+    font-weight: 400;
+    letter-spacing: 0;
+    line-height: 1.75rem;
+    padding: 0px;
+  }
+  
+  .note-dialog-cstm .p-dialog-content textarea {
+    width: 100%;
+    padding: 0px !important;
+    border: 0px !important;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5rem;
+    letter-spacing: 0.00625em;
+    max-height: 500px;
+  }
+  
+  .note-dialog-cstm .footer-btn {
+    display: flex;
+    justify-content: flex-start;
+    gap: 15px;
+    padding-top: 5px;
+  }

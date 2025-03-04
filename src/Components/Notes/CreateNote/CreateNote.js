@@ -1,12 +1,13 @@
 import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { Toast } from "primereact/toast";
-import Loader from "./Loader/Loader";
-import BgColorOption from "./BGColorOption/BgColorOption";
-import FileUploader from "./FileUpload";
+import Loader from "../../Loader/Loader";
+import BgColorOption from "../../BGColorOption/BgColorOption";
+import FileUploader from "../../FileUpload/FileUpload";
 import { IoClose } from "react-icons/io5"; // Close icon
 import ContentEditable from "react-contenteditable";
 import { Tooltip } from "primereact/tooltip";
+import "./createnote.css"
 
 const API_URL = "https://gkeepbackend.campingx.net/postNote/";
 const API_TOKEN = "As#Jjjjj4qjo4r90m*NG&h8ha_839";

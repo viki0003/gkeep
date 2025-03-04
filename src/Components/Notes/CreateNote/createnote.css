@@ -1,0 +1,70 @@
+
+
+.create-note .cn-header.ui,
+.create-note {
+  padding: 12px 16px;
+  box-shadow: 0px 0px 6px 5px #0000000f;
+  border-radius: 10px;
+}
+
+.create-note {
+  max-width: 600px;
+  width: 100%;
+  margin: auto;
+  margin-bottom: 30px;
+}
+
+.create-note .cn-body textarea {
+  width: 100%;
+  max-height: 250px;
+  margin-top: 15px;
+}
+
+.create-note .cn-body textarea,
+.cn-header input,
+.p-dialog-content textarea {
+  width: 100%;
+  resize: none;
+}
+
+.cn-header input {
+  font-size: 18px;
+}
+
+.cn-ftr-btn {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.cn-ftr-btn button {
+  padding: 5px 20px;
+  border-radius: 5px;
+  border: 0px;
+  cursor: pointer;
+}
+
+button.add-Btn {
+  background: burlywood;
+  color: black;
+}
+
+
+.create-note .cn-header input {
+    padding: 0;
+      font-size: 1rem;
+      font-weight: 500;
+      line-height: 1.5rem;
+  }
+  
+  .cn-body .ce-wrapper p {
+    letter-spacing: .0142857143em;
+    font-family: Roboto, Arial, sans-serif;
+    font-size: .875rem;
+    font-weight: 400;
+    line-height: 1.25rem;
+    color: rgb(32,33,36);
+    position: absolute;
+    top: 4px;
+    z-index: 0;
+  }

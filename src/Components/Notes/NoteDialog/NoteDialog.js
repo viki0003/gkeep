@@ -2,13 +2,14 @@ import React, { useState, useEffect, useRef } from "react";
 import { Dialog } from "primereact/dialog";
 import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";
-import BgColorOption from "./BGColorOption/BgColorOption";
+import BgColorOption from "../../BGColorOption/BgColorOption";
 import axios from "axios";
-import Loader from "./Loader/Loader";
+import Loader from "../../Loader/Loader";
 import { BsTrash } from "react-icons/bs";
-import AddFiles from "./AddFiles";
+import AddFiles from "../../FileUpload/AddFiles";
 import ContentEditable from "react-contenteditable";
 import { Tooltip } from "primereact/tooltip";
+import "./notedialog.css";
 
 const NoteDialog = ({ visible, onHide, selectedNote, onUpdate, onDelete }) => {
   const [title, setTitle] = useState("");
@@ -174,7 +175,7 @@ const NoteDialog = ({ visible, onHide, selectedNote, onUpdate, onDelete }) => {
           text_content: selectedNote.text_content,
           bg_color: selectedNote.bg_color,
           color: selectedNote.color,
-          file_uploads: selectedNote.file_uploads
+          file_uploads: selectedNote.file_uploads,
         },
         {
           headers: {
@@ -182,9 +183,9 @@ const NoteDialog = ({ visible, onHide, selectedNote, onUpdate, onDelete }) => {
           },
         }
       );
-  
+
       console.log("API Response:", response.data); // Debugging line
-  
+
       if (response.status === 200) {
         toast.current.show({
           severity: "success",
@@ -205,9 +206,7 @@ const NoteDialog = ({ visible, onHide, selectedNote, onUpdate, onDelete }) => {
       setLoading(false);
     }
   };
-  
-  
-  
+
   const handleRemoveFile = (index) => {
     setFiles(files.filter((_, i) => i !== index));
   };
@@ -219,44 +218,53 @@ const NoteDialog = ({ visible, onHide, selectedNote, onUpdate, onDelete }) => {
   const footerContent = (
     <div className="dialog-footer">
       <div className="cn-ftr-icons-left">
-        <div className="bg-color-options" ref={colorPickerRef}>
-          <div
-            className="bg-color-icon"
-            title="Change color"
-            onClick={() => setIsVisible(!isVisible)}
-          ></div>
-          {isVisible && (
-            <BgColorOption
-              setBgColor={setBgColor}
-              setTextColor={setTextColor}
-            />
-          )}
-        </div>
-        <div className="attach-file">
-          <AddFiles onFilesSelected={handleFilesSelected} />
-        </div>
+        {!selectedNote?.is_archived && (
+          <>
+            <div className="bg-color-options" ref={colorPickerRef}>
+              <div
+                className="bg-color-icon"
+                title="Change color"
+                onClick={() => setIsVisible(!isVisible)}
+              ></div>
+              {isVisible && (
+                <BgColorOption
+                  setBgColor={setBgColor}
+                  setTextColor={setTextColor}
+                />
+              )}
+            </div>
+            <div className="attach-file">
+              <AddFiles onFilesSelected={handleFilesSelected} />
+            </div>
+          </>
+        )}
       </div>
       <div className="footer-btn">
         <Button
-          label="Delete"
+          label="Delete Note"
           icon="pi pi-trash"
           className="p-button-danger"
           onClick={handleDelete}
         />
-        <Button label="Save" icon="pi pi-check" onClick={handleSave} />
+        {selectedNote?.is_archived && (
+           <Button label="Un Archive Note" icon="pi pi-check" onClick={handleSave} />
+        )}
+        {!selectedNote?.is_archived && (
+          <Button label="Save" icon="pi pi-check" onClick={handleSave} />
+        )}
       </div>
     </div>
   );
 
   useEffect(() => {
     if (loading) {
-      document.body.classList.add('overflow-hidden');
+      document.body.classList.add("overflow-hidden");
     } else {
-      document.body.classList.remove('overflow-hidden');
+      document.body.classList.remove("overflow-hidden");
     }
-    
+
     return () => {
-      document.body.classList.remove('overflow-hidden');
+      document.body.classList.remove("overflow-hidden");
     };
   }, [loading]);
 
@@ -273,6 +281,7 @@ const NoteDialog = ({ visible, onHide, selectedNote, onUpdate, onDelete }) => {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 style={{ color: textColor }}
+                disabled={selectedNote?.is_archived}
               />
             }
             visible={visible}
@@ -286,7 +295,7 @@ const NoteDialog = ({ visible, onHide, selectedNote, onUpdate, onDelete }) => {
             <ContentEditable
               innerRef={contentEditableRef}
               html={formatTextWithLinks(textContent)}
-              disabled={false}
+              disabled={selectedNote?.is_archived} // Disable when archived
               onChange={handleContentChange}
               className="content-editable"
               onKeyDown={(e) => {
@@ -346,12 +355,14 @@ const NoteDialog = ({ visible, onHide, selectedNote, onUpdate, onDelete }) => {
                         ) : (
                           <span>Unsupported file</span>
                         )}
-                        <span
-                          className="img-remove-btn"
-                          onClick={() => handleRemoveFile(index)}
-                        >
-                          <BsTrash />
-                        </span>
+                        {!selectedNote?.is_archived && (
+                          <span
+                            className="img-remove-btn"
+                            onClick={() => handleRemoveFile(index)}
+                          >
+                            <BsTrash />
+                          </span>
+                        )}
                       </div>
                     );
                   })}

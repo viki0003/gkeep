@@ -1,0 +1,78 @@
+
+.note-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 25px;
+    justify-content: center;
+  }
+  
+  .note-list .item {
+    width: calc(25% - 25px);
+    padding: 15px;
+    border: 1px solid #dadce0;
+    border-radius: 6px;
+    word-break: break-word;
+  }
+  
+  .note-list .item p {
+    word-break: break-word;
+  }
+  
+  .note-list .item h4 {
+    font-size: 16px;
+    line-height: 26px;
+    margin-bottom: 10px;
+  }
+  
+  .note-list .item p {
+    font-size: 14px;
+    line-height: 24px;
+  }
+
+  
+  
+.note-header-title {position: relative;}
+
+.note-header-title .note-pin {
+    position: absolute;
+    top: -26px;
+    right: -7px;
+    width: 25px;
+    height: 25px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f5f5f5;
+    border-radius: 50px;
+    padding: 3px;
+    border: 1px solid #909090;
+    font-size: 12px;
+}
+
+.pinned-section{
+  padding: 13px;
+}
+
+.note-list.pinned-notes-list {
+  justify-content: flex-start;
+  margin-top: 15px;
+  margin-bottom: 50px;
+}
+
+.note-list .item .note-pin {
+  display: none;
+}
+
+.note-list .item:hover .note-pin {
+  display: flex;
+}
+
+.pinned-section .note-pin {
+  display: flex !important;
+}
+
+.pinned-section .note-list {
+  justify-content: flex-start;
+  margin-top: 25px;
+  margin-bottom: 50px;
+}

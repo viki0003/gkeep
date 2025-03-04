@@ -58,160 +58,15 @@ span.search-icon span {
   padding: 25px;
 }
 
-.note-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 25px;
-  justify-content: center;
+.archive-icon {
+  background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSIjMDAwIj4KICA8cGF0aCBkPSJNMjAuNTQgNS4yM2wtMS4zOS0xLjY4QzE4Ljg4IDMuMjEgMTguNDcgMyAxOCAzSDZjLS40NyAwLS44OC4yMS0xLjE2LjU1TDMuNDYgNS4yM0MzLjE3IDUuNTcgMyA2LjAyIDMgNi41VjE5YzAgMS4xLjkgMiAyIDJoMTRjMS4xIDAgMi0uOSAyLTJWNi41YzAtLjQ4LS4xNy0uOTMtLjQ2LTEuMjd6TTYuMjQgNWgxMS41MmwuODMgMUg1LjQybC44Mi0xek01IDE5VjhoMTR2MTFINXptMTEtNS41bC00IDQtNC00IDEuNDEtMS40MUwxMSAxMy42N1YxMGgydjMuNjdsMS41OS0xLjU5TDE2IDEzLjV6Ii8+Cjwvc3ZnPgo=);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 18px 18px;
 }
 
-.note-list .item {
-  width: calc(25% - 25px);
-  padding: 15px;
-  border: 1px solid #dadce0;
-  border-radius: 6px;
-  word-break: break-word;
-}
-
-.note-list .item p {
-  word-break: break-word;
-}
-
-.note-list .item h4 {
-  font-size: 16px;
-  line-height: 26px;
-  margin-bottom: 10px;
-}
-
-.note-list .item p {
-  font-size: 14px;
-  line-height: 24px;
-}
-
-.note-dialog-cstm .p-dialog-header .p-dialog-title input {
-  width: 100%;
-  font-size: 1.375rem;
-  font-weight: 400;
-  letter-spacing: 0;
-  line-height: 1.75rem;
-  padding: 0px;
-}
-
-.note-dialog-cstm .p-dialog-content textarea {
-  width: 100%;
-  padding: 0px !important;
-  border: 0px !important;
-  font-size: 1rem;
-  font-weight: 400;
-  line-height: 1.5rem;
-  letter-spacing: 0.00625em;
-  max-height: 500px;
-}
-
-.note-dialog-cstm .footer-btn {
-  display: flex;
-  justify-content: flex-start;
-  gap: 15px;
-  padding-top: 5px;
-}
-
-.create-note .cn-header.ui,
-.create-note {
-  padding: 12px 16px;
-  box-shadow: 0px 0px 6px 5px #0000000f;
-  border-radius: 10px;
-}
-
-.create-note {
-  max-width: 600px;
-  width: 100%;
-  margin: auto;
-  margin-bottom: 30px;
-}
-
-.create-note .cn-body textarea {
-  width: 100%;
-  max-height: 250px;
-  margin-top: 15px;
-}
-
-.create-note .cn-body textarea,
-.cn-header input,
-.p-dialog-content textarea {
-  width: 100%;
-  resize: none;
-}
-
-.cn-header input {
-  font-size: 18px;
-}
-
-.cn-ftr-btn {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-}
-
-.cn-ftr-btn button {
-  padding: 5px 20px;
-  border-radius: 5px;
-  border: 0px;
+.refresh {
   cursor: pointer;
-}
-
-button.add-Btn {
-  background: burlywood;
-  color: black;
-}
-
-.refresh{
-  cursor: pointer;
-}
-
-.note-header-title {position: relative;}
-
-.note-header-title .note-pin {
-    position: absolute;
-    top: -26px;
-    right: -7px;
-    width: 25px;
-    height: 25px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #f5f5f5;
-    border-radius: 50px;
-    padding: 3px;
-    border: 1px solid #909090;
-    font-size: 12px;
-}
-
-.pinned-section{
-  padding: 13px;
-}
-
-.note-list.pinned-notes-list {
-  justify-content: flex-start;
-  margin-top: 15px;
-  margin-bottom: 50px;
-}
-
-.note-list .item .note-pin {
-  display: none;
-}
-
-.note-list .item:hover .note-pin {
-  display: flex;
-}
-
-.pinned-section .note-pin {
-  display: flex !important;
-}
-
-.pinned-section .note-list {
-  justify-content: flex-start;
-  margin-top: 25px;
-  margin-bottom: 50px;
 }
 
 .uploaded-files {
@@ -284,7 +139,8 @@ button.add-Btn {
   text-align: center;
 }
 
-.create-note input, .create-note textarea {
+.create-note input,
+.create-note textarea {
   background: transparent;
 }
 
@@ -313,7 +169,13 @@ button.add-Btn {
   background: #fff;
 }
 
-a.pdf-link {display: block;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;width: 125px;}
+a.pdf-link {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 125px;
+}
 
 span.img-remove-btn {
   position: absolute;
@@ -358,7 +220,10 @@ a.url-link {
   border: 0px;
 }
 
-.p-dialog-header, .p-dialog-header input, .p-dialog-footer, .p-dialog-content {
+.p-dialog-header,
+.p-dialog-header input,
+.p-dialog-footer,
+.p-dialog-content {
   background: transparent;
 }
 
@@ -367,27 +232,110 @@ a.url-link {
   margin-top: 12px;
 }
 
-.create-note .cn-header input {
-  padding: 0;
-    font-size: 1rem;
-    font-weight: 500;
-    line-height: 1.5rem;
-}
-
-.cn-body .ce-wrapper p {
-  letter-spacing: .0142857143em;
-  font-family: Roboto, Arial, sans-serif;
-  font-size: .875rem;
-  font-weight: 400;
-  line-height: 1.25rem;
-  color: rgb(32,33,36);
-  position: absolute;
-  top: 4px;
-  z-index: 0;
-}
-
 .ce-wrapper {
   position: relative;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+}
+
+.header-right a.archived-notes-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.refresh {
+  padding-top: 6px;
+}
+
+/* Auth Login */
+
+.form {
+  background-color: #fff;
+  display: block;
+}
+
+.form-title {
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+  font-weight: 600;
+  text-align: center;
+  color: #000;
+}
+
+.input-container {
+  position: relative;
+}
+
+.input-container input, .form button {
+  outline: none;
+  border: 1px solid #e5e7eb;
+  margin: 8px 0;
+}
+
+.input-container input {
+  background-color: #fff;
+  padding: 1rem;
+  padding-right: 3rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  width: 100%;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.input-container span {
+  display: grid;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  place-content: center;
+}
+
+.input-container span svg {
+  color: #9CA3AF;
+  width: 1rem;
+  height: 1rem;
+}
+
+.submit {
+  display: block;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+  background-color: #4F46E5;
+  color: #ffffff;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 500;
+  width: 100%;
+  border-radius: 0.5rem;
+  text-transform: uppercase;
+}
+
+.signup-link {
+  color: #6B7280;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  text-align: center;
+}
+
+.signup-link a {
+  text-decoration: underline;
+}
+
+.logout-icon{
+  display: flex;
+  cursor: pointer;
 }
 @media (max-width: 991px) {
   .note-list .item {
@@ -438,5 +386,5 @@ a.url-link {
 
   .header .logo img {
     width: 55px;
-}
+  }
 }

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import Icon from "../Assets/Icons/AllIcons";
+import Icon from "../../Assets/Icons/AllIcons";
 
 const SearchBar = ({ onSearch }) => {
   const [searchText, setSearchText] = useState("");
