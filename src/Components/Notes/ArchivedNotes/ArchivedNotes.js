@@ -249,13 +249,37 @@ const Anotes = () => {
                           />
                         </div>
                         {note.title?.trim() && (
-                          <h4
-                            style={{
-                              color: note.color?.toLowerCase(),
-                            }}
-                          >
-                            {highlightText(note.title, searchTerm)}
-                          </h4>
+                          <>
+                            <ContentEditable
+                              html={formatTextWithLinks(
+                                trimText(note.title, searchTerm),
+                                searchTerm
+                              )}
+                              disabled={true}
+                              onChange={() => {}}
+                              tagName="div"
+                              className="ce-note-title"
+                              style={{
+                                color: note.color?.toLowerCase(),
+                                cursor: "text",
+                                padding: "8px 0",
+                              }}
+                              onClick={(e) => {
+                                if (e.target.tagName === "A") {
+                                  window.open(e.target.href, "_blank");
+                                  e.preventDefault();
+                                }
+                              }}
+                            />
+
+                            {/* <h4
+                              style={{
+                                color: note.color?.toLowerCase(),
+                              }}
+                            >
+                              {highlightText(note.title, searchTerm)}
+                            </h4> */}
+                          </>
                         )}
                       </div>
                       <Tooltip target=".url-link" />
@@ -356,13 +380,37 @@ const Anotes = () => {
                           />
                         </div>
                         {note.title?.trim() && (
-                          <h4
-                            style={{
-                              color: note.color?.toLowerCase(),
-                            }}
-                          >
-                            {highlightText(note.title, searchTerm)}
-                          </h4>
+                          <>
+                            <ContentEditable
+                              html={formatTextWithLinks(
+                                trimText(note.title, searchTerm),
+                                searchTerm
+                              )}
+                              disabled={true}
+                              onChange={() => {}}
+                              tagName="div"
+                              className="ce-note-title"
+                              style={{
+                                color: note.color?.toLowerCase(),
+                                cursor: "text",
+                                padding: "8px 0",
+                              }}
+                              onClick={(e) => {
+                                if (e.target.tagName === "A") {
+                                  window.open(e.target.href, "_blank");
+                                  e.preventDefault();
+                                }
+                              }}
+                            />
+
+                            {/* <h4
+                              style={{
+                                color: note.color?.toLowerCase(),
+                              }}
+                            >
+                              {highlightText(note.title, searchTerm)}
+                            </h4> */}
+                          </>
                         )}
                       </div>
                       <Tooltip target=".url-link" />

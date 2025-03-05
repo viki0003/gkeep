@@ -50,6 +50,77 @@ const NotesList = () => {
     fetchNotes();
   }, []);
 
+  // Filter notes based on search
+  useEffect(() => {
+    if (!searchTerm.trim()) {
+      setFilteredNotes(notes);
+      return;
+    }
+
+    const filtered = notes.filter(
+      (note) =>
+        note.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        note.text_content?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    setFilteredNotes(filtered);
+  }, [searchTerm, notes]);
+
+  // Highlight matched text
+  const highlightText = (text, searchTerm) => {
+    if (!text || !searchTerm) return text;
+    const parts = text.split(new RegExp(`(${searchTerm})`, "gi"));
+    return parts
+      .map((part, i) =>
+        part.toLowerCase() === searchTerm.toLowerCase()
+          ? `<span style="background-color: #f6e477">${part}</span>`
+          : part
+      )
+      .join("");
+  };
+
+  // Trim text to 65 words
+  const trimText = (text, searchTerm) => {
+    if (!text) return "";
+
+    const content = String(text);
+    if (!searchTerm) return content;
+
+    const searchIndex = content.toLowerCase().indexOf(searchTerm.toLowerCase());
+    if (searchIndex === -1) return content;
+
+    const start = Math.max(0, searchIndex - 20);
+    const end = Math.min(content.length, searchIndex + searchTerm.length + 20);
+    return content.substring(start, end);
+  };
+
+  const formatTextWithLinks = (text, searchTerm) => {
+    if (!text) return "";
+
+    // First highlight the text
+    let highlightedText = highlightText(text, searchTerm);
+
+    // Then convert URLs to links
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    return highlightedText.replace(
+      urlRegex,
+      (url) =>
+        `<a href="${url}" class="url-link" data-pr-tooltip="Click to open">${url}</a>`
+    );
+  };
+
+  useEffect(() => {
+    if (loading) {
+      document.body.classList.add("overflow-hidden");
+    } else {
+      document.body.classList.remove("overflow-hidden");
+    }
+
+    return () => {
+      document.body.classList.remove("overflow-hidden");
+    };
+  }, [loading]);
+
   const handleAddNote = (newNote) => {
     const updatedNotes = [newNote, ...notes];
     setNotes(updatedNotes);
@@ -134,84 +205,6 @@ const NotesList = () => {
     }
   };
 
-  // Highlight matched text
-  const highlightText = (text, search) => {
-    if (!search.trim()) return text;
-
-    const regex = new RegExp(`(${search})`, "gi");
-    return text.split(regex).map((part, index) =>
-      part.toLowerCase() === search.toLowerCase() ? (
-        <mark key={index} style={{ backgroundColor: "yellow" }}>
-          {part}
-        </mark>
-      ) : (
-        part
-      )
-    );
-  };
-
-  // Trim text to 65 words
-  const trimText = (text, search) => {
-    if (!text) return "";
-
-    const words = text.split(/\s+/);
-    if (words.length <= 65) return highlightText(text, search);
-
-    const trimmedText = words.slice(0, 65).join(" ") + "...";
-    return highlightText(trimmedText, search);
-  };
-
-  // Filter notes based on search
-  useEffect(() => {
-    if (!searchTerm.trim()) {
-      setFilteredNotes(notes);
-      return;
-    }
-
-    const filtered = notes.filter(
-      (note) =>
-        (note.title?.trim() || note.text_content?.trim()) &&
-        (note.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          note.text_content?.toLowerCase().includes(searchTerm.toLowerCase()))
-    );
-
-    setFilteredNotes(filtered);
-  }, [searchTerm, notes]);
-
-  const formatTextWithLinks = (text) => {
-    // Handle null, undefined, or non-string values
-    if (!text || typeof text !== "string") {
-      return "";
-    }
-
-    const strippedText = text.replace(/<a[^>]*>(.*?)<\/a>/g, "$1");
-
-    const urlRegex =
-      /((?:https?:\/\/)?(?:www\.)?[a-zA-Z0-9-]+(?:\.[a-zA-Z]{2,})+(?:\/[^\s]*)?)/g;
-
-    return strippedText.replace(urlRegex, (url) => {
-      if (url.includes("<a") || url.includes("</a>")) return url;
-
-      const fullUrl = url.startsWith("www.") ? `http://${url}` : url;
-      const finalUrl = fullUrl.startsWith("http")
-        ? fullUrl
-        : `http://${fullUrl}`;
-      return `<a href="${finalUrl}" class="url-link" data-pr-tooltip="Open Url" data-pr-position="top">${url}</a>`;
-    });
-  };
-
-  useEffect(() => {
-    if (loading) {
-      document.body.classList.add("overflow-hidden");
-    } else {
-      document.body.classList.remove("overflow-hidden");
-    }
-
-    return () => {
-      document.body.classList.remove("overflow-hidden");
-    };
-  }, [loading]);
-
   return (
     <>
       <Header
@@ -253,24 +246,50 @@ const NotesList = () => {
                           />
                         </div>
                         {note.title?.trim() && (
-                          <h4
-                            style={{
-                              color: note.color?.toLowerCase(),
-                            }}
-                          >
-                            {highlightText(note.title, searchTerm)}
-                          </h4>
+                          <>
+                            <ContentEditable
+                              html={formatTextWithLinks(
+                                trimText(note.title, searchTerm),
+                                searchTerm
+                              )}
+                              disabled={true}
+                              onChange={() => {}}
+                              tagName="div"
+                              className="ce-note-title"
+                              style={{
+                                color: note.color?.toLowerCase(),
+                                cursor: "text",
+                                padding: "8px 0",
+                              }}
+                              onClick={(e) => {
+                                if (e.target.tagName === "A") {
+                                  window.open(e.target.href, "_blank");
+                                  e.preventDefault();
+                                }
+                              }}
+                            />
+
+                            {/* <h4
+                              style={{
+                                color: note.color?.toLowerCase(),
+                              }}
+                            >
+                              {highlightText(note.title, searchTerm)}
+                            </h4> */}
+                          </>
                         )}
                       </div>
                       <Tooltip target=".url-link" />
-                      {note.text_content?.trim() ? (
+                      {note.text_content && (
                         <ContentEditable
                           html={formatTextWithLinks(
-                            trimText(note.text_content, searchTerm)
+                            trimText(note.text_content, searchTerm),
+                            searchTerm
                           )}
                           disabled={true}
                           onChange={() => {}}
                           tagName="div"
+                          
                           style={{
                             color: note.color?.toLowerCase(),
                             cursor: "text",
@@ -283,8 +302,6 @@ const NotesList = () => {
                             }
                           }}
                         />
-                      ) : (
-                        console.warn("No Text Found")
                       )}
                       {/* Image Section */}
                       <div className="note-images-container">
@@ -355,20 +372,45 @@ const NotesList = () => {
                         />
                       </div>
                       {note.title?.trim() && (
-                        <h4
-                          style={{
-                            color: note.color?.toLowerCase(),
-                          }}
-                        >
-                          {highlightText(note.title, searchTerm)}
-                        </h4>
+                        <>
+                          <ContentEditable
+                            html={formatTextWithLinks(
+                              trimText(note.title, searchTerm),
+                              searchTerm
+                            )}
+                            disabled={true}
+                            onChange={() => {}}
+                            tagName="div"
+                            style={{
+                              color: note.color?.toLowerCase(),
+                              cursor: "text",
+                              padding: "8px 0",
+                            }}
+                            className="ce-note-title"
+                            onClick={(e) => {
+                              if (e.target.tagName === "A") {
+                                window.open(e.target.href, "_blank");
+                                e.preventDefault();
+                              }
+                            }}
+                          />
+
+                          {/* <h4
+                            style={{
+                              color: note.color?.toLowerCase(),
+                            }}
+                          >
+                            {highlightText(note.title, searchTerm)}
+                          </h4> */}
+                        </>
                       )}
                     </div>
                     <Tooltip target=".url-link" />
-                    {note.text_content?.trim() ? (
+                    {note.text_content && (
                       <ContentEditable
                         html={formatTextWithLinks(
-                          trimText(note.text_content, searchTerm)
+                          trimText(note.text_content, searchTerm),
+                          searchTerm
                         )}
                         disabled={true}
                         onChange={() => {}}
@@ -385,8 +427,6 @@ const NotesList = () => {
                           }
                         }}
                       />
-                    ) : (
-                      console.warn("NO Text Found")
                     )}
                     {/* Image Section */}
                     <div className="note-images-container">

@@ -53,6 +53,12 @@
   padding: 13px;
 }
 
+.ce-note-title {
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 28px;
+}
+
 .note-list.pinned-notes-list {
   justify-content: flex-start;
   margin-top: 15px;
