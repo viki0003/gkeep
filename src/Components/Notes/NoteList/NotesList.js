@@ -82,16 +82,24 @@ const NotesList = () => {
   // Trim text to 65 words
   const trimText = (text, searchTerm) => {
     if (!text) return "";
-
+  
     const content = String(text);
-    if (!searchTerm) return content;
-
-    const searchIndex = content.toLowerCase().indexOf(searchTerm.toLowerCase());
-    if (searchIndex === -1) return content;
-
-    const start = Math.max(0, searchIndex - 20);
-    const end = Math.min(content.length, searchIndex + searchTerm.length + 20);
-    return content.substring(start, end);
+    const words = content.split(/\s+/);
+    
+    if (searchTerm) {
+      const searchIndex = content.toLowerCase().indexOf(searchTerm.toLowerCase());
+      if (searchIndex !== -1) {
+        const start = Math.max(0, searchIndex - 20);
+        const end = Math.min(content.length, searchIndex + searchTerm.length + 20);
+        return content.substring(start, end);
+      }
+    }
+  
+    if (words.length > 65) {
+      return words.slice(0, 65).join(' ') + '...';
+    }
+  
+    return content;
   };
 
   const formatTextWithLinks = (text, searchTerm) => {
