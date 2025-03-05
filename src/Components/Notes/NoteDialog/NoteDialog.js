@@ -215,6 +215,81 @@ const NoteDialog = ({ visible, onHide, selectedNote, onUpdate, onDelete }) => {
     setAddedFiles(addedFiles.filter((_, i) => i !== index));
   };
 
+  const handleUnarchive = async () => {
+    if (!selectedNote) return;
+    setLoading(true);
+    try {
+      const response = await axios.put(
+        `https://gkeepbackend.campingx.net/updateNote/?id=${selectedNote.id}`,
+        {
+          is_archived: false,
+          title: selectedNote.title,
+          text_content: selectedNote.text_content,
+          bg_color: selectedNote.bg_color,
+          color: selectedNote.color,
+          file_uploads: selectedNote.file_uploads,
+        },
+        {
+          headers: {
+            Authorization: "Bearer As#Jjjjj4qjo4r90m*NG&h8ha_839",
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        toast.current.show({
+          severity: "success",
+          summary: "Success",
+          detail: "Note unarchived successfully",
+        });
+        onDelete(selectedNote.id);
+        onHide();
+      }
+    } catch (error) {
+      toast.current.show({
+        severity: "error",
+        summary: "Error",
+        detail: "Failed to unarchive note",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteNote = async () => {
+    if (!selectedNote) return;
+    setLoading(true);
+    try {
+      const response = await axios.delete(
+        `https://gkeepbackend.campingx.net/deleteNote/?id=${selectedNote.id}`,
+        {
+          headers: {
+            Authorization: "Bearer As#Jjjjj4qjo4r90m*NG&h8ha_839",
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        toast.current.show({
+          severity: "success",
+          summary: "Deleted",
+          detail: "Note deleted successfully",
+        });
+        onDelete(selectedNote.id);
+        onHide();
+      }
+    } catch (error) {
+      toast.current.show({
+        severity: "error",
+        summary: "Error",
+        detail: "Failed to delete note",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  
   const footerContent = (
     <div className="dialog-footer">
       <div className="cn-ftr-icons-left">
@@ -239,20 +314,35 @@ const NoteDialog = ({ visible, onHide, selectedNote, onUpdate, onDelete }) => {
           </>
         )}
       </div>
-      <div className="footer-btn">
-        <Button
-          label="Delete Note"
-          icon="pi pi-trash"
-          className="p-button-danger"
-          onClick={handleDelete}
-        />
-        {selectedNote?.is_archived && (
-           <Button label="Un Archive Note" icon="pi pi-check" onClick={handleSave} />
-        )}
-        {!selectedNote?.is_archived && (
+      {!selectedNote?.is_archived && (
+        <div className="footer-btn">
+          <Button
+            label="Delete Note"
+            icon="pi pi-trash"
+            className="p-button-danger"
+            onClick={handleDelete}
+          />
+
           <Button label="Save" icon="pi pi-check" onClick={handleSave} />
-        )}
-      </div>
+        </div>
+      )}
+
+      {selectedNote?.is_archived && (
+        <div className="footer-btn">
+          <Button
+            label="Un Archive Note"
+            icon="pi pi-check"
+            onClick={handleUnarchive}
+          />
+
+          <Button
+            label="Delete Note"
+            className="p-button-danger"
+            icon="pi pi-trash"
+            onClick={handleDeleteNote}
+          />
+        </div>
+      )}
     </div>
   );
 
