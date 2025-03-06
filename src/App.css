@@ -348,6 +348,10 @@ a.url-link {
     width: 100%;
   }
 
+  div#pr_id_375 {
+    width: 90% !important;
+}
+
   .header .search-bar,
   .header .search-bar .search-bar-item {
     width: 100%;
