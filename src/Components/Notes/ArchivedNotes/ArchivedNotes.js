@@ -129,33 +129,6 @@ const Anotes = () => {
     }
   };
 
-  // Highlight matched text
-  const highlightText = (text, search) => {
-    if (!search.trim()) return text;
-
-    const regex = new RegExp(`(${search})`, "gi");
-    return text.split(regex).map((part, index) =>
-      part.toLowerCase() === search.toLowerCase() ? (
-        <mark key={index} style={{ backgroundColor: "yellow" }}>
-          {part}
-        </mark>
-      ) : (
-        part
-      )
-    );
-  };
-
-  // Trim text to 65 words
-  const trimText = (text, search) => {
-    if (!text) return "";
-
-    const words = text.split(/\s+/);
-    if (words.length <= 65) return highlightText(text, search);
-
-    const trimmedText = words.slice(0, 65).join(" ") + "...";
-    return highlightText(trimmedText, search);
-  };
-
   // Filter notes based on search
   useEffect(() => {
     if (!searchTerm.trim()) {
@@ -165,34 +138,67 @@ const Anotes = () => {
 
     const filtered = notes.filter(
       (note) =>
-        (note.title?.trim() || note.text_content?.trim()) &&
-        (note.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          note.text_content?.toLowerCase().includes(searchTerm.toLowerCase()))
+        note.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        note.text_content?.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     setFilteredNotes(filtered);
   }, [searchTerm, notes]);
 
-  const formatTextWithLinks = (text) => {
-    // Handle null, undefined, or non-string values
-    if (!text || typeof text !== "string") {
-      return "";
+  // Highlight matched text
+  const highlightText = (text, searchTerm) => {
+    if (!text || !searchTerm) return text;
+    const parts = text.split(new RegExp(`(${searchTerm})`, "gi"));
+    return parts
+      .map((part, i) =>
+        part.toLowerCase() === searchTerm.toLowerCase()
+          ? `<span style="background-color: #f6e477">${part}</span>`
+          : part
+      )
+      .join("");
+  };
+
+  // Trim text to 65 words
+  const trimText = (text, searchTerm) => {
+    if (!text) return "";
+
+    const content = String(text);
+    const words = content.split(/\s+/);
+
+    if (searchTerm) {
+      const searchIndex = content
+        .toLowerCase()
+        .indexOf(searchTerm.toLowerCase());
+      if (searchIndex !== -1) {
+        const start = Math.max(0, searchIndex - 20);
+        const end = Math.min(
+          content.length,
+          searchIndex + searchTerm.length + 20
+        );
+        return content.substring(start, end);
+      }
     }
 
-    const strippedText = text.replace(/<a[^>]*>(.*?)<\/a>/g, "$1");
+    if (words.length > 65) {
+      return words.slice(0, 65).join(" ") + "...";
+    }
 
-    const urlRegex =
-      /((?:https?:\/\/)?(?:www\.)?[a-zA-Z0-9-]+(?:\.[a-zA-Z]{2,})+(?:\/[^\s]*)?)/g;
+    return content;
+  };
 
-    return strippedText.replace(urlRegex, (url) => {
-      if (url.includes("<a") || url.includes("</a>")) return url;
+  const formatTextWithLinks = (text, searchTerm) => {
+    if (!text) return "";
 
-      const fullUrl = url.startsWith("www.") ? `http://${url}` : url;
-      const finalUrl = fullUrl.startsWith("http")
-        ? fullUrl
-        : `http://${fullUrl}`;
-      return `<a href="${finalUrl}" class="url-link" data-pr-tooltip="Open Url" data-pr-position="top">${url}</a>`;
-    });
+    // First highlight the text
+    let highlightedText = highlightText(text, searchTerm);
+
+    // Then convert URLs to links
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    return highlightedText.replace(
+      urlRegex,
+      (url) =>
+        `<a href="${url}" class="url-link" data-pr-tooltip="Click to open">${url}</a>`
+    );
   };
 
   useEffect(() => {
@@ -206,7 +212,6 @@ const Anotes = () => {
       document.body.classList.remove("overflow-hidden");
     };
   }, [loading]);
-
 
   return (
     <>
@@ -273,20 +278,21 @@ const Anotes = () => {
                             />
 
                             {/* <h4
-                              style={{
-                                color: note.color?.toLowerCase(),
-                              }}
-                            >
-                              {highlightText(note.title, searchTerm)}
-                            </h4> */}
+                                          style={{
+                                            color: note.color?.toLowerCase(),
+                                          }}
+                                        >
+                                          {highlightText(note.title, searchTerm)}
+                                        </h4> */}
                           </>
                         )}
                       </div>
                       <Tooltip target=".url-link" />
-                      {note.text_content?.trim() ? (
+                      {note.text_content && (
                         <ContentEditable
                           html={formatTextWithLinks(
-                            trimText(note.text_content, searchTerm)
+                            trimText(note.text_content, searchTerm),
+                            searchTerm
                           )}
                           disabled={true}
                           onChange={() => {}}
@@ -303,8 +309,6 @@ const Anotes = () => {
                             }
                           }}
                         />
-                      ) : (
-                        console.warn("No Text Found")
                       )}
                       {/* Image Section */}
                       <div className="note-images-container">
@@ -314,10 +318,7 @@ const Anotes = () => {
                             style={{ display: "flex", gap: "5px" }}
                           >
                             {note.file_uploads.map((file, index) => (
-                              <div
-                                key={index}
-                               
-                              >
+                              <div key={index}>
                                 {file.endsWith(".jpg") ||
                                 file.endsWith(".png") ||
                                 file.endsWith(".jpeg") ? (
@@ -389,12 +390,12 @@ const Anotes = () => {
                               disabled={true}
                               onChange={() => {}}
                               tagName="div"
-                              className="ce-note-title"
                               style={{
                                 color: note.color?.toLowerCase(),
                                 cursor: "text",
                                 padding: "8px 0",
                               }}
+                              className="ce-note-title"
                               onClick={(e) => {
                                 if (e.target.tagName === "A") {
                                   window.open(e.target.href, "_blank");
@@ -404,20 +405,21 @@ const Anotes = () => {
                             />
 
                             {/* <h4
-                              style={{
-                                color: note.color?.toLowerCase(),
-                              }}
-                            >
-                              {highlightText(note.title, searchTerm)}
-                            </h4> */}
+                                         style={{
+                                           color: note.color?.toLowerCase(),
+                                         }}
+                                       >
+                                         {highlightText(note.title, searchTerm)}
+                                       </h4> */}
                           </>
                         )}
                       </div>
                       <Tooltip target=".url-link" />
-                      {note.text_content?.trim() ? (
+                      {note.text_content && (
                         <ContentEditable
                           html={formatTextWithLinks(
-                            trimText(note.text_content, searchTerm)
+                            trimText(note.text_content, searchTerm),
+                            searchTerm
                           )}
                           disabled={true}
                           onChange={() => {}}
@@ -434,8 +436,6 @@ const Anotes = () => {
                             }
                           }}
                         />
-                      ) : (
-                        console.warn("NO Text Found")
                       )}
                       {/* Image Section */}
                       <div className="note-images-container">
@@ -447,7 +447,9 @@ const Anotes = () => {
                             {note.file_uploads.map((file, index) => (
                               <div
                                 key={index}
-                               
+                                style={{
+                                  width: `${100 / note.file_uploads.length}%`,
+                                }}
                               >
                                 {file.endsWith(".jpg") ||
                                 file.endsWith(".png") ||

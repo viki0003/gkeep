@@ -82,3 +82,7 @@
   margin-top: 25px;
   margin-bottom: 50px;
 }
+
+.p-tooltip.p-tooltip-active {
+  display: none;
+}
