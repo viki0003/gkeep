@@ -208,7 +208,7 @@ const NotesList = () => {
           setFilteredNotes([noteToUnpin, ...notes]);
         }
       } catch (error) {
-        console.error("Error unpinning note:", error);
+        console.error("Error with unpinning note:", error);
       }
     }
   };
