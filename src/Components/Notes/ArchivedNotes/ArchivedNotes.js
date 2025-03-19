@@ -445,12 +445,7 @@ const Anotes = () => {
                             style={{ display: "flex", gap: "5px" }}
                           >
                             {note.file_uploads.map((file, index) => (
-                              <div
-                                key={index}
-                                style={{
-                                  width: `${100 / note.file_uploads.length}%`,
-                                }}
-                              >
+                              <div key={index}>
                                 {file.endsWith(".jpg") ||
                                 file.endsWith(".png") ||
                                 file.endsWith(".jpeg") ? (
