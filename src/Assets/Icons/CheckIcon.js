@@ -4,14 +4,14 @@ const CheckIcon = () => {
       <g strokeWidth="0" id="SVGRepo_bgCarrier"></g>
       <g
         strokeLinejoin="round"
-        stroke-linecap="round"
+        strokeLinecap="round"
         id="SVGRepo_tracerCarrier"
       ></g>
       <g id="SVGRepo_iconCarrier">
         <g id="Interface / Check">
           <path
             strokeLinejoin="round"
-            stroke-linecap="round"
+            strokeLinecap="round"
             strokeWidth="2"
             stroke="#000"
             d="M6 12L10.2426 16.2426L18.727 7.75732"
