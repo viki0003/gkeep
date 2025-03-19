@@ -7,7 +7,8 @@ import FileUploader from "../../FileUpload/FileUpload";
 import { IoClose } from "react-icons/io5"; // Close icon
 import ContentEditable from "react-contenteditable";
 import { Tooltip } from "primereact/tooltip";
-import "./createnote.css"
+import { FaBold, FaItalic, FaUnderline } from "react-icons/fa";
+import "./createnote.css";
 
 const API_URL = "https://gkeepbackend.campingx.net/postNote/";
 const API_TOKEN = "As#Jjjjj4qjo4r90m*NG&h8ha_839";
@@ -21,6 +22,11 @@ const CreateNote = ({ fetchNotes }) => {
   const [fileUploads, setFileUploads] = useState([]);
   const [bgColor, setBgColor] = useState("#ffffff"); // Default color
   const [textColor, setTextColor] = useState("#000000"); // Default color
+  const [formatStates, setFormatStates] = useState({
+    bold: false,
+    italic: false,
+    underline: false,
+  });
   const toast = useRef(null);
   const colorPickerRef = useRef(null);
   const contentEditableRef = useRef(null);
@@ -139,6 +145,46 @@ const CreateNote = ({ fetchNotes }) => {
     };
   }, [loading]);
 
+  const handleFormat = (command) => {
+    document.execCommand(command, false, null);
+  
+    setFormatStates((prev) => ({
+      ...prev,
+      [command]: !prev[command],
+    }));
+  
+    contentEditableRef.current?.focus();
+  };
+  
+  
+  // Detect spaces and prevent blank underline
+  useEffect(() => {
+    const handleKeyUp = (event) => {
+      if (event.key === " ") {
+        const selection = window.getSelection();
+        if (!selection.rangeCount) return;
+  
+        const range = selection.getRangeAt(0);
+        const node = range.startContainer;
+  
+        if (node.nodeType === Node.TEXT_NODE) {
+          const text = node.textContent;
+  
+          // If the text is only spaces or ends with a space, remove underline
+          if (!text.trim() || text.endsWith(" ")) {
+            document.execCommand("removeFormat", false, null);
+            setFormatStates((prev) => ({ ...prev, underline: false }));
+          }
+        }
+      }
+    };
+  
+    document.addEventListener("keyup", handleKeyUp);
+    return () => document.removeEventListener("keyup", handleKeyUp);
+  }, [formatStates.underline]);
+  
+  
+
   return (
     <>
       <div className="create-note" style={{ backgroundColor: bgColor }}>
@@ -163,11 +209,14 @@ const CreateNote = ({ fetchNotes }) => {
 
             <Tooltip target=".url-link" />
             <div className="ce-wrapper">
-            {(!textContent || textContent === '<br>') && (
-              <p onClick={() => contentEditableRef.current?.focus()}>Take a note...</p>
-            )}
+              {(!textContent || textContent === "<br>") && (
+                <p onClick={() => contentEditableRef.current?.focus()}>
+                  Take a note...
+                </p>
+              )}
+
               <ContentEditable
-               innerRef={contentEditableRef}
+                innerRef={contentEditableRef}
                 html={textContent}
                 disabled={false}
                 onChange={handleContentChange}
@@ -229,6 +278,35 @@ const CreateNote = ({ fetchNotes }) => {
                 </div>
                 <div className="attach-file">
                   <FileUploader setFileUploads={setFileUploads} />
+                </div>
+                <div className="formatting-toolbar">
+                  <button
+                    className={`format-btn ${
+                      formatStates.bold ? "active" : ""
+                    }`}
+                    onClick={() => handleFormat("bold")}
+                    title="Bold"
+                  >
+                    <FaBold />
+                  </button>
+                  <button
+                    className={`format-btn ${
+                      formatStates.italic ? "active" : ""
+                    }`}
+                    onClick={() => handleFormat("italic")}
+                    title="Italic"
+                  >
+                    <FaItalic />
+                  </button>
+                  <button
+                    className={`format-btn ${
+                      formatStates.underline ? "active" : ""
+                    }`}
+                    onClick={() => handleFormat("underline")}
+                    title="Underline"
+                  >
+                    <FaUnderline />
+                  </button>
                 </div>
               </div>
               <div className="cn-ftr-btn">

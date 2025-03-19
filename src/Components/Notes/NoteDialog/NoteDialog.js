@@ -9,6 +9,7 @@ import { BsTrash } from "react-icons/bs";
 import AddFiles from "../../FileUpload/AddFiles";
 import ContentEditable from "react-contenteditable";
 import { Tooltip } from "primereact/tooltip";
+import { FaBold, FaItalic, FaUnderline } from "react-icons/fa";
 import "./notedialog.css";
 
 const NoteDialog = ({ visible, onHide, selectedNote, onUpdate, onDelete }) => {
@@ -20,6 +21,11 @@ const NoteDialog = ({ visible, onHide, selectedNote, onUpdate, onDelete }) => {
   const [files, setFiles] = useState([]);
   const [addedFiles, setAddedFiles] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [formatStates, setFormatStates] = useState({
+    bold: false,
+    italic: false,
+    underline: false
+  });
   const toast = useRef(null);
   const colorPickerRef = useRef(null);
   const contentEditableRef = useRef(null);
@@ -288,8 +294,46 @@ const NoteDialog = ({ visible, onHide, selectedNote, onUpdate, onDelete }) => {
       setLoading(false);
     }
   };
+
+  // Add format handlers
+  const handleFormat = (command) => {
+    document.execCommand(command, false, null);
+  
+    setFormatStates((prev) => ({
+      ...prev,
+      [command]: !prev[command],
+    }));
+  
+    contentEditableRef.current?.focus();
+  };
   
   
+  // Detect spaces and prevent blank underline
+  useEffect(() => {
+    const handleKeyUp = (event) => {
+      if (event.key === " ") {
+        const selection = window.getSelection();
+        if (!selection.rangeCount) return;
+  
+        const range = selection.getRangeAt(0);
+        const node = range.startContainer;
+  
+        if (node.nodeType === Node.TEXT_NODE) {
+          const text = node.textContent;
+  
+          // If the text is only spaces or ends with a space, remove underline
+          if (!text.trim() || text.endsWith(" ")) {
+            document.execCommand("removeFormat", false, null);
+            setFormatStates((prev) => ({ ...prev, underline: false }));
+          }
+        }
+      }
+    };
+  
+    document.addEventListener("keyup", handleKeyUp);
+    return () => document.removeEventListener("keyup", handleKeyUp);
+  }, [formatStates.underline]);
+
   const footerContent = (
     <div className="dialog-footer">
       <div className="cn-ftr-icons-left">
@@ -310,6 +354,30 @@ const NoteDialog = ({ visible, onHide, selectedNote, onUpdate, onDelete }) => {
             </div>
             <div className="attach-file">
               <AddFiles onFilesSelected={handleFilesSelected} />
+            </div>
+
+            <div className="formatting-toolbar">
+              <button
+                className={`format-btn ${formatStates.bold ? 'active' : ''}`}
+                onClick={() => handleFormat("bold")}
+                title="Bold"
+              >
+                <FaBold />
+              </button>
+              <button
+                className={`format-btn ${formatStates.italic ? 'active' : ''}`}
+                onClick={() => handleFormat("italic")}
+                title="Italic"
+              >
+                <FaItalic />
+              </button>
+              <button
+                className={`format-btn ${formatStates.underline ? 'active' : ''}`}
+                onClick={() => handleFormat("underline")}
+                title="Underline"
+              >
+                <FaUnderline />
+              </button>
             </div>
           </>
         )}
