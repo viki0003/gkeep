@@ -186,19 +186,24 @@ const Anotes = () => {
     return content;
   };
 
-  const formatTextWithLinks = (text, searchTerm) => {
+  const formatTextWithLinks = (text) => {
     if (!text) return "";
 
+    const strippedText = text.replace(/<a[^>]*>(.*?)<\/a>/g, "$1");
     // First highlight the text
-    let highlightedText = highlightText(text, searchTerm);
 
-    // Then convert URLs to links
-    const urlRegex = /(https?:\/\/[^\s]+)/g;
-    return highlightedText.replace(
-      urlRegex,
-      (url) =>
-        `<a href="${url}" class="url-link" data-pr-tooltip="Click to open">${url}</a>`
-    );
+    const urlRegex =
+      /((?:https?:\/\/)?(?:www\.)?[a-zA-Z0-9-]+(?:\.[a-zA-Z]{2,})+(?:\/[^\s]*)?)/g;
+
+    return strippedText.replace(urlRegex, (url) => {
+      if (url.includes("<a") || url.includes("</a>")) return url;
+
+      const fullUrl = url.startsWith("www.") ? `http://${url}` : url;
+      const finalUrl = fullUrl.startsWith("http")
+        ? fullUrl
+        : `http://${fullUrl}`;
+      return `<a href="${finalUrl}" class="url-link">${url}</a>`;
+    });
   };
 
   useEffect(() => {
@@ -256,10 +261,7 @@ const Anotes = () => {
                         {note.title?.trim() && (
                           <>
                             <ContentEditable
-                              html={formatTextWithLinks(
-                                trimText(note.title, searchTerm),
-                                searchTerm
-                              )}
+                              html={formatTextWithLinks(highlightText(trimText(note.title, searchTerm), searchTerm))}
                               disabled={true}
                               onChange={() => {}}
                               tagName="div"
@@ -290,10 +292,7 @@ const Anotes = () => {
                       <Tooltip target=".url-link" />
                       {note.text_content && (
                         <ContentEditable
-                          html={formatTextWithLinks(
-                            trimText(note.text_content, searchTerm),
-                            searchTerm
-                          )}
+                          html={formatTextWithLinks(highlightText(trimText(note.text_content, searchTerm), searchTerm))}
                           disabled={true}
                           onChange={() => {}}
                           tagName="div"
@@ -383,10 +382,7 @@ const Anotes = () => {
                         {note.title?.trim() && (
                           <>
                             <ContentEditable
-                              html={formatTextWithLinks(
-                                trimText(note.title, searchTerm),
-                                searchTerm
-                              )}
+                              html={formatTextWithLinks(highlightText(trimText(note.title, searchTerm), searchTerm))}
                               disabled={true}
                               onChange={() => {}}
                               tagName="div"
@@ -417,10 +413,7 @@ const Anotes = () => {
                       <Tooltip target=".url-link" />
                       {note.text_content && (
                         <ContentEditable
-                          html={formatTextWithLinks(
-                            trimText(note.text_content, searchTerm),
-                            searchTerm
-                          )}
+                        html={formatTextWithLinks(highlightText(trimText(note.text_content, searchTerm), searchTerm))}
                           disabled={true}
                           onChange={() => {}}
                           tagName="div"

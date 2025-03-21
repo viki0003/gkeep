@@ -82,39 +82,50 @@ const NotesList = () => {
   // Trim text to 65 words
   const trimText = (text, searchTerm) => {
     if (!text) return "";
-  
+
     const content = String(text);
     const words = content.split(/\s+/);
-    
+
     if (searchTerm) {
-      const searchIndex = content.toLowerCase().indexOf(searchTerm.toLowerCase());
+      const searchIndex = content
+        .toLowerCase()
+        .indexOf(searchTerm.toLowerCase());
       if (searchIndex !== -1) {
         const start = Math.max(0, searchIndex - 20);
-        const end = Math.min(content.length, searchIndex + searchTerm.length + 20);
+        const end = Math.min(
+          content.length,
+          searchIndex + searchTerm.length + 20
+        );
         return content.substring(start, end);
       }
     }
-  
+
     if (words.length > 65) {
-      return words.slice(0, 65).join(' ') + '...';
+      return words.slice(0, 65).join(" ") + "...";
     }
-  
+
     return content;
   };
 
-  const formatTextWithLinks = (text, searchTerm) => {
+
+  const formatTextWithLinks = (text) => {
     if (!text) return "";
 
+    const strippedText = text.replace(/<a[^>]*>(.*?)<\/a>/g, "$1");
     // First highlight the text
-    let highlightedText = highlightText(text, searchTerm);
 
-    // Then convert URLs to links
-    const urlRegex = /(https?:\/\/[^\s]+)/g;
-    return highlightedText.replace(
-      urlRegex,
-      (url) =>
-        `<a href="${url}" class="url-link" data-pr-tooltip="Click to open">${url}</a>`
-    );
+    const urlRegex =
+      /((?:https?:\/\/)?(?:www\.)?[a-zA-Z0-9-]+(?:\.[a-zA-Z]{2,})+(?:\/[^\s]*)?)/g;
+
+    return strippedText.replace(urlRegex, (url) => {
+      if (url.includes("<a") || url.includes("</a>")) return url;
+
+      const fullUrl = url.startsWith("www.") ? `http://${url}` : url;
+      const finalUrl = fullUrl.startsWith("http")
+        ? fullUrl
+        : `http://${fullUrl}`;
+      return `<a href="${finalUrl}" class="url-link">${url}</a>`;
+    });
   };
 
   useEffect(() => {
@@ -256,10 +267,7 @@ const NotesList = () => {
                         {note.title?.trim() && (
                           <>
                             <ContentEditable
-                              html={formatTextWithLinks(
-                                trimText(note.title, searchTerm),
-                                searchTerm
-                              )}
+                              html={formatTextWithLinks(highlightText(trimText(note.title, searchTerm), searchTerm))}
                               disabled={true}
                               onChange={() => {}}
                               tagName="div"
@@ -290,14 +298,10 @@ const NotesList = () => {
                       <Tooltip target=".url-link" />
                       {note.text_content && (
                         <ContentEditable
-                          html={formatTextWithLinks(
-                            trimText(note.text_content, searchTerm),
-                            searchTerm
-                          )}
+                        html={formatTextWithLinks(highlightText(trimText(note.text_content, searchTerm), searchTerm))}
                           disabled={true}
                           onChange={() => {}}
                           tagName="div"
-                          
                           style={{
                             color: note.color?.toLowerCase(),
                             cursor: "text",
@@ -383,8 +387,10 @@ const NotesList = () => {
                         <>
                           <ContentEditable
                             html={formatTextWithLinks(
-                              trimText(note.title, searchTerm),
-                              searchTerm
+                              highlightText(
+                                trimText(note.title, searchTerm),
+                                searchTerm
+                              )
                             )}
                             disabled={true}
                             onChange={() => {}}
@@ -416,10 +422,7 @@ const NotesList = () => {
                     <Tooltip target=".url-link" />
                     {note.text_content && (
                       <ContentEditable
-                        html={formatTextWithLinks(
-                          trimText(note.text_content, searchTerm),
-                          searchTerm
-                        )}
+                        html={formatTextWithLinks(highlightText(trimText(note.text_content, searchTerm), searchTerm))}
                         disabled={true}
                         onChange={() => {}}
                         tagName="div"
@@ -444,9 +447,7 @@ const NotesList = () => {
                           style={{ display: "flex", gap: "5px" }}
                         >
                           {note.file_uploads.map((file, index) => (
-                            <div
-                              key={index}
-                            >
+                            <div key={index}>
                               {file.endsWith(".jpg") ||
                               file.endsWith(".png") ||
                               file.endsWith(".jpeg") ? (
