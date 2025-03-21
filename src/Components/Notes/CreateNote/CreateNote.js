@@ -76,11 +76,18 @@ const CreateNote = ({ fetchNotes }) => {
       }
     } catch (error) {
       console.error("Error adding note:", error);
-      toast.current.show({
-        severity: "error",
-        summary: "Error",
-        detail: "Failed to create note",
-      });
+      if (error.response?.status === 500) {
+        toast.current.show({
+          severity: "error",
+          summary: "Error",
+          detail: "Duplicate title not allowed. The note title already exists.",
+        });
+      } else
+        toast.current.show({
+          severity: "error",
+          summary: "Error",
+          detail: "Failed to add note",
+        });
     } finally {
       setLoading(false);
     }
