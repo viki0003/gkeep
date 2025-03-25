@@ -11,6 +11,7 @@ import ContentEditable from "react-contenteditable";
 import { Tooltip } from "primereact/tooltip";
 import { FaBold, FaItalic, FaUnderline } from "react-icons/fa";
 import "./notedialog.css";
+import sanitizeHtml from "sanitize-html";
 
 const NoteDialog = ({ visible, onHide, selectedNote, onUpdate, onDelete }) => {
   const [title, setTitle] = useState("");
@@ -67,9 +68,40 @@ const NoteDialog = ({ visible, onHide, selectedNote, onUpdate, onDelete }) => {
 
   const handleContentChange = (evt) => {
     const text = evt.target.value;
-    if (text !== textContent) {
-      const formattedText = formatTextWithLinks(text);
-      setTextContent(formattedText);
+    
+    // Sanitize the input to remove HTML tags except for basic text formatting
+    const cleanText = sanitizeHtml(text, {
+      allowedTags: ["br", "div", "b", "i", "u"], // Allowed tags
+      allowedAttributes: {} // No attributes allowed
+    });
+  
+    if (cleanText !== textContent) {
+      setTextContent(cleanText);
+    }
+  };
+
+const handlePaste = (event) => {
+    event.preventDefault();
+
+    // Get clipboard data as HTML
+    let clipboardHTML = event.clipboardData.getData("text/html");
+    let clipboardText = event.clipboardData.getData("text/plain");
+
+    // Sanitize HTML while allowing certain tags
+    const cleanHTML = sanitizeHtml(clipboardHTML || clipboardText, {
+      allowedTags: ["b", "i", "em", "strong", "a", "br", "p", "div", "span", "ul", "ol", "li"],
+      allowedAttributes: {
+        a: ["href", "target"],
+        div: ["style"],
+        span: ["style"],
+      },
+    });
+
+    if (cleanHTML) {
+      const pasteContent = cleanHTML + "&nbsp;"; // Add space after pasting
+
+      // Insert sanitized content at cursor position
+      document.execCommand("insertHTML", false, pasteContent);
     }
   };
 
@@ -455,6 +487,7 @@ const NoteDialog = ({ visible, onHide, selectedNote, onUpdate, onDelete }) => {
               html={formatTextWithLinks(textContent)}
               disabled={selectedNote?.is_archived} // Disable when archived
               onChange={handleContentChange}
+              onPaste={handlePaste}
               className="content-editable"
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
